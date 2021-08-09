@@ -10,6 +10,8 @@ if [ $NPROC -gt 1 ] ; then
 	NPROC=`expr $NPROC - 1`
 fi
 
+export PYTHON3_ENABLE=FALSE
+
 if [ "${SDK_VER}" = "4.4" ]; then
 	export WORKSPACE= # for Jenkins' workspace to not interfere with UEFI's one
 	export EDK_TOOLS_PATH=${BIOS_WORKSPACE}/edk2/BaseTools
