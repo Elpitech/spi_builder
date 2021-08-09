@@ -43,6 +43,7 @@ printf "0:%.12x" $BAIKALM_GMAC0_MACADDR | xxd -groupsize4 -revert >  ${BOARD_IDS
 printf "0:%.12x" $BAIKALM_GMAC1_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
 printf "0:%.12x" $BAIKALM_XGBE0_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
 printf "0:%.12x" $BAIKALM_XGBE1_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
+hash crc32 || exit
 printf "0:%.8x" "0x$(crc32 <(cat ${BOARD_IDS_BIN}))" | \
 	sed -E 's/0:(..)(..)(..)(..)/0:\4\3\2\1/' | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
 
