@@ -48,7 +48,7 @@ and 'pins set', or just run:
 Flashrom shall be at least version 1.2:
 $ cd img
 
-# You will need at least firmware-v1.2 installed. If it is not available in the
+# You will need at least flashrom-v1.2 installed. If it is not available in the
 # repo, just build the current flashrom from source. You will need libftdi-dev
 # installed first.
 

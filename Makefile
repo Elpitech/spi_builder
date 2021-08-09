@@ -1,23 +1,23 @@
 # The kernel sources are used to build DTB. The sources are at:
-# git@github.com:edelweiss-tech/kernel.git
+# git@github.com:elpitech/kernel.git
 KDIR ?= $(HOME)/gitlab/baikal-m/kernel
 
 # You can use a generic ARM64 compiler, or the one from Baikal SDK
 CROSS := $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
 
-# ARM_TF_GIT := git@gitlab.tpl:baikal-m/arm-tf.git
-ARM_TF_GIT := git@github.com:edelweiss-tech/arm-tf.git
+ARM_TF_GIT := git@gitlab.tpl:baikal-m/arm-tf.git
+# ARM_TF_GIT := git@github.com:elpitech/arm-tf.git
 
 # For older UEFI from SDK 4.4 use our sources
-# OLD_EDK2_GIT := git@gitlab.tpl:baikal-m/edk2.git -b 4.4-tp
-OLD_EDK2_GIT := git@github.com:edelweiss-tech/edk2.git -b 4.4-tp
+OLD_EDK2_GIT := git@gitlab.tpl:baikal-m/edk2.git -b 4.4-tp
+# OLD_EDK2_GIT := git@github.com:elpitech/edk2.git -b 4.4-tp
 
 # Newer UEFI in SDK 5.1 is coupled with the upstream code. Only
 # platform-specific part comes from our sources.
 NEW_EDK2_GIT := http://github.com/tianocore/edk2.git
 NEW_EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
-#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.tpl:baikal-m/edk2-platform-baikal.git
-NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:edelweiss-tech/edk2-platform-baikal.git
+NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.tpl:baikal-m/edk2-platform-baikal.git
+#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git
 
 # SDK_VER = 4.4
 SDK_VER ?= 5.1
