@@ -15,7 +15,7 @@ Alternatively, for monoblocks with LVDS:
 $ make BOARD=mitx-d-lvds
 
 To build for older SDK:
-$ make SDK_VER=4.4 BOARD=mitx-d
+$ make SDK_MAJOR_REV=4 SDK_MINOR_REV=4 BOARD=mitx-d
 
 To build a debug module separate from the SPI image:
 
@@ -37,6 +37,7 @@ How to burn the image to SPI
 
 sudo apt install libftdi1
 
+# Connect to BMC console
 $ minicom -C ses.log S2
 
 You need to set ATX_PSON and EN_1V8 pins. Either do it directly with 'pins list'
@@ -44,9 +45,6 @@ and 'pins set', or just run:
 
 >:pins bootseq
 >:pins cpu_off
-
-Flashrom shall be at least version 1.2:
-$ cd img
 
 # You will need at least flashrom-v1.2 installed. If it is not available in the
 # repo, just build the current flashrom from source. You will need libftdi-dev
@@ -59,7 +57,7 @@ $ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.ful
 $ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256 -l mitx-d.layout -i scp
 
 
-Upon success, type in minicom:
+Upon success, type in BMC console:
 
 >:pins board_off
 ```

@@ -1,3 +1,10 @@
+# SDK_VER = 4.4
+SDK_MAJOR_REV ?= 5
+SDK_MINOR_REV ?= 2
+SDK_VER = $(SDK_MAJOR_REV).$(SDK_MINOR_REV)
+BOARD ?= mitx-d
+PLAT = bm1000
+
 # The kernel sources are used to build DTB. The sources are at:
 # git@github.com:elpitech/kernel.git
 KDIR ?= $(HOME)/gitlab/baikal-m/kernel
@@ -16,14 +23,13 @@ OLD_EDK2_GIT := git@gitlab.elp:baikal-m/edk2.git -b 4.4-tp
 # platform-specific part comes from our sources.
 NEW_EDK2_GIT := http://github.com/tianocore/edk2.git
 NEW_EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
-NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git
-#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git
-
-# SDK_VER = 4.4
-SDK_VER ?= 5.1
-SDK_REV = 1
-BOARD ?= mitx-d
-PLAT = bm1000
+ifeq ($(SDK_VER),5.1)
+	NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git
+	#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git
+else ifeq ($(SDK_VER),5.2)
+	NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git -b 5.2-elp
+	#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git -b 5.2-elp
+endif
 
 ifeq ($(BOARD),mitx)
 	BE_TARGET = mitx
@@ -62,7 +68,7 @@ KERNEL_FLAGS = O=$(DTB_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(KDIR)
 
 ifeq ($(SDK_VER),4.4)
 else
-	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
+	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_MINOR_REV)
 	UEFI_FLAGS += -DFIRMWARE_VENDOR=\"Edelweiss\"
 endif
 ifeq ($(BE_TARGET),mitx)
@@ -79,29 +85,29 @@ ARMTF_BUILD_DIR = $(ARMTF_DIR)/build/$(PLAT)/$(ARMTF_BUILD_TYPE)
 BL1_BIN = $(ARMTF_BUILD_DIR)/bl1.bin
 FIP_BIN = $(ARMTF_BUILD_DIR)/fip.bin
 
-all: setup bootrom
+all: clone bootrom
 
-setup:
+clone:
 ifeq ($(SDK_VER),4.4)
 	if [ ! -d $(BIOS_WORKSPACE) ]; then \
-	mkdir $(BIOS_WORKSPACE); \
-	cd $(BIOS_WORKSPACE); \
-	git clone $(ARM_TF_GIT) -b v2.3-tp; \
-	git clone $(OLD_EDK2_GIT); \
-	cd $(CURDIR); \
+		mkdir $(BIOS_WORKSPACE); \
+		cd $(BIOS_WORKSPACE); \
+		git clone $(ARM_TF_GIT) -b v2.3-tp; \
+		git clone $(OLD_EDK2_GIT); \
+		cd $(CURDIR); \
 	fi
 else
 	if [ ! -d $(BIOS_WORKSPACE) ]; then \
-	mkdir $(BIOS_WORKSPACE); \
-	cd $(BIOS_WORKSPACE); \
-	git clone $(ARM_TF_GIT) -b v2.4-tp; \
-	git clone $(NEW_EDK2_GIT); \
-	git clone $(NEW_EDK2_NON_OSI_GIT); \
-	git clone $(NEW_EDK2_PLATFORM_SPECIFIC_GIT); \
-	cd $(BIOS_WORKSPACE)/edk2; \
-	git checkout 06dc822d045; \
-	git submodule update --init; \
-	cd $(CURDIR); \
+		mkdir $(BIOS_WORKSPACE); \
+		cd $(BIOS_WORKSPACE); \
+		git clone $(ARM_TF_GIT) -b v2.4-tp; \
+		git clone $(NEW_EDK2_GIT); \
+		git clone $(NEW_EDK2_NON_OSI_GIT); \
+		git clone $(NEW_EDK2_PLATFORM_SPECIFIC_GIT); \
+		cd $(BIOS_WORKSPACE)/edk2; \
+		git checkout 06dc822d045; \
+		git submodule update --init; \
+		cd $(CURDIR); \
 	fi
 endif
 
@@ -120,7 +126,7 @@ else
 	cp $(BIOS_WORKSPACE)/Build/Baikal/$(UEFI_BUILD_TYPE)_GCC5/FV/BAIKAL_EFI.fd $(IMG_DIR)/$(BOARD).efi.fd
 endif
 
-$(IMG_DIR)/$(BOARD).fip.bin: $(IMG_DIR)/$(BOARD).efi.fd
+fip $(IMG_DIR)/$(BOARD).fip.bin: uefi
 	rm -rf $(ARMTF_DIR)/build
 	mkdir -p $(ARMTF_DIR)/build
 	echo $(BOARD) > $(ARMTF_DIR)/build/subtarget
@@ -129,7 +135,7 @@ $(IMG_DIR)/$(BOARD).fip.bin: $(IMG_DIR)/$(BOARD).efi.fd
 	cp $(FIP_BIN) $(IMG_DIR)/$(BOARD).fip.bin
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
-bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
+bootrom: fip dtb
 	IMG_DIR=$(IMG_DIR) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) ./genrom.sh
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
