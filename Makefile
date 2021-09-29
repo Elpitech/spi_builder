@@ -2,6 +2,7 @@
 SDK_MAJOR_REV ?= 5
 SDK_MINOR_REV ?= 2
 SDK_VER = $(SDK_MAJOR_REV).$(SDK_MINOR_REV)
+SDK_REV = 0x$(SDK_MAJOR_REV)$(SDK_MINOR_REV)
 BOARD ?= mitx-d
 PLAT = bm1000
 
@@ -14,21 +15,36 @@ CROSS := $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-
 
 ARM_TF_GIT := git@gitlab.elp:baikal-m/arm-tf.git
 # ARM_TF_GIT := git@github.com:elpitech/arm-tf.git
-
-# For older UEFI from SDK 4.4 use our sources
-OLD_EDK2_GIT := git@gitlab.elp:baikal-m/edk2.git -b 4.4-tp
-# OLD_EDK2_GIT := git@github.com:elpitech/edk2.git -b 4.4-tp
-
-# Newer UEFI in SDK 5.1 is coupled with the upstream code. Only
-# platform-specific part comes from our sources.
-NEW_EDK2_GIT := http://github.com/tianocore/edk2.git
-NEW_EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
-ifeq ($(SDK_VER),5.1)
-	NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git
-	#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git
+ifeq ($(SDK_VER),4.4)
+	ARMTF_BRANCH = v2.3-tp
+	EDK2_PLATFORM_BRANCH = 4.4-tp
+	UEFI_PLATFORM=ArmBaikalPkg/ArmBaikalBfkm.dsc 
+else ifeq ($(SDK_VER),5.1)
+	ARMTF_BRANCH = v2.4-tp
+	EDK2_PLATFORM_BRANCH = master
+	FW_VENDOR = \"Edelweiss\"
+	UEFI_PLATFORM=Platform/Baikal/Baikal.dsc 
 else ifeq ($(SDK_VER),5.2)
-	NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git -b 5.2-elp
-	#NEW_EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git -b 5.2-elp
+	ARMTF_BRANCH = 5.2-elp
+	EDK2_PLATFORM_BRANCH = 5.2-elp
+	FW_VENDOR = \"Elpitech\"
+	UEFI_PLATFORM=Platform/Baikal/BM1000Rdb/BM1000Rdb.dsc
+endif
+
+ifeq ($(SDK_VER),4.4)
+	# For older UEFI use our sources
+	EDK2_GIT := git@gitlab.elp:baikal-m/edk2.git
+	# EDK2_GIT := git@github.com:elpitech/edk2.git
+else
+	# Newer UEFI in SDK 5.x is coupled with the upstream code. Only
+	# platform-specific part comes from our sources.
+	EDK2_GIT := http://github.com/tianocore/edk2.git
+	EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
+	EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elp:baikal-m/edk2-platform-baikal.git
+	#EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:elpitech/edk2-platform-baikal.git
+
+	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
+	UEFI_FLAGS += -DFIRMWARE_VENDOR=$(FW_VENDOR)
 endif
 
 ifeq ($(BOARD),mitx)
@@ -66,11 +82,6 @@ TARGET_CFG = $(BE_TARGET)_defconfig
 TARGET_DTB = baikal/bm-$(BOARD).dtb
 KERNEL_FLAGS = O=$(DTB_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(KDIR)
 
-ifeq ($(SDK_VER),4.4)
-else
-	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_MINOR_REV)
-	UEFI_FLAGS += -DFIRMWARE_VENDOR=\"Edelweiss\"
-endif
 ifeq ($(BE_TARGET),mitx)
 	UEFI_FLAGS += -DBE_MITX=TRUE -DBOARD_VER=$(BOARD_VER)
 endif
@@ -92,18 +103,19 @@ ifeq ($(SDK_VER),4.4)
 	if [ ! -d $(BIOS_WORKSPACE) ]; then \
 		mkdir $(BIOS_WORKSPACE); \
 		cd $(BIOS_WORKSPACE); \
-		git clone $(ARM_TF_GIT) -b v2.3-tp; \
-		git clone $(OLD_EDK2_GIT); \
+		git clone $(ARM_TF_GIT) -b $(ARMTF_BRANCH); \
+		git clone $(OLD_EDK2_GIT) -b $(EDK2_PLATFORM_BRANCH); \
 		cd $(CURDIR); \
 	fi
 else
+	# For SDK 5.1 and 5.2 the procedure is the same so far
 	if [ ! -d $(BIOS_WORKSPACE) ]; then \
 		mkdir $(BIOS_WORKSPACE); \
 		cd $(BIOS_WORKSPACE); \
-		git clone $(ARM_TF_GIT) -b v2.4-tp; \
-		git clone $(NEW_EDK2_GIT); \
-		git clone $(NEW_EDK2_NON_OSI_GIT); \
-		git clone $(NEW_EDK2_PLATFORM_SPECIFIC_GIT); \
+		git clone $(ARM_TF_GIT) -b $(ARMTF_BRANCH); \
+		git clone $(EDK2_GIT); \
+		git clone $(EDK2_NON_OSI_GIT); \
+		git clone $(EDK2_PLATFORM_SPECIFIC_GIT) -b $(EDK2_PLATFORM_BRANCH); \
 		cd $(BIOS_WORKSPACE)/edk2; \
 		git checkout 06dc822d045; \
 		git submodule update --init; \
@@ -119,7 +131,7 @@ uefi $(IMG_DIR)/$(BOARD).efi.fd: basetools
 	mkdir -p img
 	rm -f $(IMG_DIR)/$(BOARD).efi.fd
 	rm -rf $(BIOS_WORKSPACE)/Build
-	SDK_VER=$(SDK_VER) BIOS_WORKSPACE=$(BIOS_WORKSPACE) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" ./builduefi.sh
+	SDK_VER=$(SDK_VER) BIOS_WORKSPACE=$(BIOS_WORKSPACE) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" UEFI_PLATFORM="$(UEFI_PLATFORM)" ./builduefi.sh
 ifeq ($(SDK_VER),4.4)
 	cp $(BIOS_WORKSPACE)/edk2/Build/ArmBaikalBfkm-AARCH64/$(UEFI_BUILD_TYPE)_GCC6/FV/BFKM_EFI.fd $(IMG_DIR)/$(BOARD).efi.fd
 else
