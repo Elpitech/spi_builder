@@ -104,7 +104,7 @@ ifeq ($(SDK_VER),4.4)
 		mkdir $(BIOS_WORKSPACE); \
 		cd $(BIOS_WORKSPACE); \
 		git clone $(ARM_TF_GIT) -b $(ARMTF_BRANCH); \
-		git clone $(OLD_EDK2_GIT) -b $(EDK2_PLATFORM_BRANCH); \
+		git clone $(EDK2_GIT) -b $(EDK2_PLATFORM_BRANCH); \
 		cd $(CURDIR); \
 	fi
 else
