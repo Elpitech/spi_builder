@@ -53,6 +53,10 @@ and 'pins set', or just run:
 # Burn full image, where BOARD is the target you have built.
 $ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256
 
+If using serprog, consult with https://github.com/dword1511/stm32-vserprog
+Generally, something like this will work:
+$ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c MT25QU256 -w file-to-load.bin
+
 # Burn a specific section
 $ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256 -l mitx-d.layout -i scp
 
