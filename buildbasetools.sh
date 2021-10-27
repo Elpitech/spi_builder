@@ -1,13 +1,12 @@
 #!/bin/bash
 
-cd ${BIOS_WORKSPACE}
-
-if [ "${SDK_VER}" = "4.4" ]; then
-	:
-else
-	export WORKSPACE=`pwd`
-	export EDK_TOOLS_PATH=${WORKSPACE}/edk2/BaseTools
-	export PACKAGES_PATH=${WORKSPACE}/edk2:${WORKSPACE}/edk2-non-osi:${WORKSPACE}/edk2-platform-baikal
-	. edk2/edksetup.sh || exit
+if [ -n "$1" ]; then
+	TARGET=$1
+	shift
 fi
-make -C edk2/BaseTools
+cd ${BIOS_WORKSPACE}
+export WORKSPACE=${BIOS_WORKSPACE}
+export EDK_TOOLS_PATH=${WORKSPACE}/edk2/BaseTools
+export PACKAGES_PATH=${WORKSPACE}/edk2:${WORKSPACE}/edk2-non-osi:${WORKSPACE}/edk2-platform-baikal
+. edk2/edksetup.sh || exit
+make -C edk2/BaseTools $TARGET

@@ -11,46 +11,6 @@ FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
 
 cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit
 truncate --no-create --size=${BL1_RESERVED_SIZE} ${FLASH_IMG} || exit
-
-BOARD_IDS_SRC=${IMG_DIR}/${BOARD}.board.ids
-if [ ! -f ${BOARD_IDS_SRC} ]; then
-	while : ; do
-		# Generate MAC addresses
-		printf "BAIKALM_GMAC0_MACADDR=0x002658%.2x%.2x%.2x\n" $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) >  ${BOARD_IDS_SRC}
-		printf "BAIKALM_GMAC1_MACADDR=0x002658%.2x%.2x%.2x\n" $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) >> ${BOARD_IDS_SRC}
-		printf "BAIKALM_XGBE0_MACADDR=0x002658%.2x%.2x%.2x\n" $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) >> ${BOARD_IDS_SRC}
-		printf "BAIKALM_XGBE1_MACADDR=0x002658%.2x%.2x%.2x\n" $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) $(( RANDOM % 0xff )) >> ${BOARD_IDS_SRC}
-			# Check if there are no duplicate MAC addresses
-		source ${BOARD_IDS_SRC}
-		[[ $BAIKALM_GMAC0_MACADDR == $BAIKALM_GMAC1_MACADDR ]] || \
-		[[ $BAIKALM_GMAC0_MACADDR == $BAIKALM_XGBE0_MACADDR ]] || \
-		[[ $BAIKALM_GMAC0_MACADDR == $BAIKALM_XGBE1_MACADDR ]] || \
-		[[ $BAIKALM_GMAC1_MACADDR == $BAIKALM_XGBE0_MACADDR ]] || \
-		[[ $BAIKALM_GMAC1_MACADDR == $BAIKALM_XGBE1_MACADDR ]] || \
-		[[ $BAIKALM_XGBE0_MACADDR == $BAIKALM_XGBE1_MACADDR ]] || \
-		break
-	done
-fi
-
-source ${BOARD_IDS_SRC}
-echo "BL1 GMAC0 MAC address: ${BAIKALM_GMAC0_MACADDR}"
-echo "BL1 GMAC1 MAC address: ${BAIKALM_GMAC1_MACADDR}"
-echo "BL1 XGBE0 MAC address: ${BAIKALM_XGBE0_MACADDR}"
-echo "BL1 XGBE1 MAC address: ${BAIKALM_XGBE1_MACADDR}"
-
-BOARD_IDS_BIN=${IMG_DIR}/${BOARD}.board.ids.bin
-printf "0:%.12x" $BAIKALM_GMAC0_MACADDR | xxd -groupsize4 -revert >  ${BOARD_IDS_BIN}
-printf "0:%.12x" $BAIKALM_GMAC1_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
-printf "0:%.12x" $BAIKALM_XGBE0_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
-printf "0:%.12x" $BAIKALM_XGBE1_MACADDR | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
-hash crc32 || exit
-printf "0:%.8x" "0x$(crc32 <(cat ${BOARD_IDS_BIN}))" | \
-	sed -E 's/0:(..)(..)(..)(..)/0:\4\3\2\1/' | xxd -groupsize4 -revert >> ${BOARD_IDS_BIN}
-
-BOARD_IDS_OFFSET=$(($( stat --format=%s ${FLASH_IMG} ) - 4 * 1024 ))
-dd if=${BOARD_IDS_BIN} of=${FLASH_IMG} seek=${BOARD_IDS_OFFSET} obs=1 conv=notrunc || exit
-rm ${BOARD_IDS_BIN}
-truncate --no-create --size=${BL1_RESERVED_SIZE} ${FLASH_IMG} || exit
 cat ${IMG_DIR}/${BOARD}.dtb >> ${FLASH_IMG} || exit
 truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE)) ${FLASH_IMG} || exit
 truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE + $UEFI_VARS_SIZE)) ${FLASH_IMG} || exit
