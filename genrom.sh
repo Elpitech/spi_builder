@@ -3,7 +3,7 @@
 
 FLASH_IMG=${IMG_DIR}/${BOARD}.flash.img
 BL1_RESERVED_SIZE=$((4 * 65536)) #0x40000
-DTB_SIZE=$(( 1 * 65536 ))
+DTB_SIZE=$(( 4 * 65536 ))
 UEFI_VARS_SIZE=$(( 12 * 65536 ))
 LINUX_PART_START=$(( 8 * 1024 * 1024 ))
 FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESERVED_SIZE)))
@@ -23,9 +23,9 @@ if [[ ${DUAL_FLASH} = 'no' ]]; then
 	dd if=${IMG_DIR}/${BOARD}.full.img of=${IMG_DIR}/${BOARD}.full.padded conv=notrunc || exit
 	echo "00000000:0007ffff scp" > ${IMG_DIR}/${BOARD}.layout
 	echo "00080000:000bffff bl1" >> ${IMG_DIR}/${BOARD}.layout
-	echo "000c0000:000cffff dtb" >> ${IMG_DIR}/${BOARD}.layout
-	echo "000d0000:0018ffff vars" >> ${IMG_DIR}/${BOARD}.layout
-	echo "00190000:007fffff fip" >> ${IMG_DIR}/${BOARD}.layout
+	echo "000c0000:000fffff dtb" >> ${IMG_DIR}/${BOARD}.layout
+	echo "00100000:001bffff vars" >> ${IMG_DIR}/${BOARD}.layout
+	echo "001c0000:007fffff fip" >> ${IMG_DIR}/${BOARD}.layout
 	echo "00800000:01ffffff fat" >> ${IMG_DIR}/${BOARD}.layout
 else
 	dd if=/dev/zero bs=1M count=32 | tr "\000" "\377" > ${IMG_DIR}/${BOARD}.full.padded || exit

@@ -15,8 +15,8 @@ EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
 EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elpitech.ru:baikal-m/edk2-platform-baikal.git
 KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git
 
-SDK_VER := 5.3
-SDK_REV = 0x53
+SDK_VER := 5.4
+SDK_REV = 0x54
 BOARD ?= et101
 PLAT = bm1000
 
@@ -26,23 +26,36 @@ ifeq ($(BOARD),mitx)
 else ifeq ($(BOARD),mitx-d)
 	BE_TARGET = mitx
 	BOARD_VER = 2
-#	DUAL_FLASH ?= yes
 else ifeq ($(BOARD),mitx-d-lvds)
 	BE_TARGET = mitx
 	BOARD_VER = 2
-#	DUAL_FLASH ?= yes
 else ifeq ($(BOARD),e107)
 	BE_TARGET = mitx
 	BOARD_VER = 1
 else ifeq ($(BOARD),et101)
 	BE_TARGET = mitx
 	BOARD_VER = 2
+else ifeq ($(BOARD),et101-dp)
+	BE_TARGET = mitx
+	BOARD_VER = 2
+	ARMTF_DEFS = "DP_ENABLE=1"
 else ifeq ($(BOARD),et101-lvds)
 	BE_TARGET = mitx
 	BOARD_VER = 2
+else ifeq ($(BOARD),et111)
+	BE_TARGET = mitx
+	BOARD_VER = 3
+	ARMTF_DEFS = "EDP_ENABLE=1"
+else ifeq ($(BOARD),em407)
+	BE_TARGET = mitx
+	BOARD_VER = 4
 endif
 
 DUAL_FLASH ?= no
+ARMTF_DEFS += "DUAL_FLASH=$(DUAL_FLASH)"
+ifeq ($(V),1)
+ARMTF_DEFS += "V=1"
+endif
 UEFI_BUILD_TYPE ?= RELEASE
 #UEFI_BUILD_TYPE = DEBUG
 ARMTF_DEBUG ?= 0
@@ -52,19 +65,20 @@ else
 ARMTF_BUILD_TYPE = debug
 endif
 
-SCP_BLOB = ./prebuilts/$(SDK_VER)/$(BE_TARGET).scp.flash.bin
+SCP_BLOB = ./prebuilts/bm1000-scp.bin
 
 ARCH = arm64
 NCPU := $(shell nproc)
 
 IMG_DIR := $(CURDIR)/img
 
-TARGET_CFG = $(BE_TARGET)_defconfig
+#TARGET_CFG = $(BE_TARGET)_defconfig
+TARGET_CFG = et101_defconfig
 TARGET_DTB = baikal/bm-$(BOARD).dtb
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
 
-ARMTF_BRANCH = 5.3-elp
-EDK2_PLAT_BRANCH = 5.3-elp
+ARMTF_BRANCH = 5.4-elp
+EDK2_PLAT_BRANCH = 5.4-elp
 KERNEL_BRANCH = linux-5.4-elp
 
 UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
@@ -81,6 +95,7 @@ FIP_BIN = $(ARMTF_BUILD_DIR)/fip.bin
 all: setup bootrom
 
 setup:
+	mkdir -p img
 ifeq ($(SRC_ROOT),)
 	mkdir -p $(UEFI_DIR)
 	[ -d $(TOP_DIR)/arm-tf ] || (git clone $(ARMTF_GIT) && cd arm-tf && git checkout $(ARMTF_BRANCH))
@@ -107,12 +122,20 @@ uefi $(IMG_DIR)/$(BOARD).efi.fd: basetools
 	SDK_VER=$(SDK_VER) BIOS_WORKSPACE=$(UEFI_DIR) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" UEFI_PLATFORM="${UEFI_PLATFORM}" ./builduefi.sh
 	cp $(UEFI_DIR)/Build/Baikal/$(UEFI_BUILD_TYPE)_GCC5/FV/BAIKAL_EFI.fd $(IMG_DIR)/$(BOARD).efi.fd
 
-$(IMG_DIR)/$(BOARD).fip.bin: $(IMG_DIR)/$(BOARD).efi.fd
-	rm -rf $(ARMTF_DIR)/build
-	mkdir -p $(ARMTF_DIR)/build
+arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOARD).efi.fd
+	if [ -d $(ARMTF_DIR)/build ]; then \
+		OLD_BOARD=$$(cat $(ARMTF_DIR)/build/subtarget); \
+		if [ "x$(BOARD)" != "x$$OLD_BOARD" ] ; then \
+			echo "OLD_BOARD = $$OLD_BOARD"; \
+			rm -rf $(ARMTF_DIR)/build; \
+			mkdir -p $(ARMTF_DIR)/build; \
+		fi; \
+	else \
+		mkdir -p $(ARMTF_DIR)/build; \
+	fi
 	echo $(BOARD) > $(ARMTF_DIR)/build/subtarget
-	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) DUAL_FLASH=$(DUAL_FLASH) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 -C $(ARMTF_DIR) all
-	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) DUAL_FLASH=$(DUAL_FLASH) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 BL33=$(IMG_DIR)/$(BOARD).efi.fd -C $(ARMTF_DIR) fip
+	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) $(ARMTF_DEFS) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 -C $(ARMTF_DIR) all
+	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) $(ARMTF_DEFS) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 BL33=$(IMG_DIR)/$(BOARD).efi.fd -C $(ARMTF_DIR) fip
 	cp $(FIP_BIN) $(IMG_DIR)/$(BOARD).fip.bin
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
@@ -128,10 +151,11 @@ dtb $(IMG_DIR)/$(BOARD).dtb:
 clean:
 	rm -rf $(KBUILD_DIR)
 	rm -rf $(UEFI_DIR)/Build
+	rm -f basetools
 	rm -rf $(IMG_DIR)/$(BOARD).*
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
 
 distclean: clean
-	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel
+	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools
 
-.PHONY: dtb uefi bootrom
+.PHONY: dtb uefi arm-tf bootrom

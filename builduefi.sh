@@ -24,5 +24,4 @@ fi
 . edk2/edksetup.sh || exit
 echo "Running build -p ${UEFI_PLATFORM} -b ${BUILD_TYPE} -a ${ARCH} -t GCC5 -n ${NPROC} ${UEFI_FLAGS}"
 build -p ${UEFI_PLATFORM} -b ${BUILD_TYPE} -a ${ARCH} -t GCC5 -n ${NPROC} ${UEFI_FLAGS} || exit
-# build -p ${UEFI_PLATFORM} -b ${BUILD_TYPE} -a ${ARCH} -t GCC5 ${UEFI_FLAGS} || exit
 echo "UEFI build: Done"
