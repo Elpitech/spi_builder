@@ -1,24 +1,29 @@
+CROSS ?= aarch64-linux-gnu-
+BOARD ?= et101
+
+SDK_VER := 5.4
+SDK_REV = 0x54
+PLAT = bm1000
+
+#KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.4-elp
+#ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
+#EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
+
+KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git -b linux-5.4-elp
+ARMTF_GIT := git@gitlab.elpitech.ru:baikal-m/arm-tf.git -b $(SDK_VER)-elp
+EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elpitech.ru:baikal-m/edk2-platform-baikal.git -b $(SDK_VER)-elp
+
+# End of user configurable parameters
+
 TOP_DIR := $(shell pwd)
 ARMTF_DIR := $(TOP_DIR)/arm-tf
 UEFI_DIR := $(TOP_DIR)/uefi
 KBUILD_DIR := $(TOP_DIR)/kbuild
 
-# You can use a generic ARM64 compiler, or the one from Baikal SDK
-CROSS ?= aarch64-linux-gnu-
-
-ARMTF_GIT := git@gitlab.elpitech.ru:baikal-m/arm-tf.git
-
 # Newer UEFI in SDK 5.1 is coupled with the upstream code. Only
 # platform-specific part comes from our sources.
 EDK2_GIT := http://github.com/tianocore/edk2.git
 EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
-EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elpitech.ru:baikal-m/edk2-platform-baikal.git
-KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git
-
-SDK_VER := 5.4
-SDK_REV = 0x54
-BOARD ?= et101
-PLAT = bm1000
 
 ifeq ($(BOARD),mitx)
 	BE_TARGET = mitx
@@ -77,10 +82,6 @@ TARGET_CFG = et101_defconfig
 TARGET_DTB = baikal/bm-$(BOARD).dtb
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
 
-ARMTF_BRANCH = 5.4-elp
-EDK2_PLAT_BRANCH = 5.4-elp
-KERNEL_BRANCH = linux-5.4-elp
-
 UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
 UEFI_PLATFORM = Platform/Baikal/BM1000Rdb/BM1000Rdb.dsc
 UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
@@ -98,11 +99,11 @@ setup:
 	mkdir -p img
 ifeq ($(SRC_ROOT),)
 	mkdir -p $(UEFI_DIR)
-	[ -d $(TOP_DIR)/arm-tf ] || (git clone $(ARMTF_GIT) && cd arm-tf && git checkout $(ARMTF_BRANCH))
+	[ -d $(TOP_DIR)/arm-tf ] || (git clone $(ARMTF_GIT))
 	[ -d $(UEFI_DIR)/edk2 ] || (cd $(UEFI_DIR) && git clone $(EDK2_GIT) && cd edk2 && git checkout 06dc822d045 && git submodule update --init)
 	[ -d $(UEFI_DIR)/edk2-non-osi ] || (cd $(UEFI_DIR) && git clone $(EDK2_NON_OSI_GIT) && cd edk2-non-osi && git checkout master)
-	[ -d $(UEFI_DIR)/edk2-platform-baikal ] || (cd $(UEFI_DIR) && git clone $(EDK2_PLATFORM_SPECIFIC_GIT) && cd edk2-platform-baikal && git checkout $(EDK2_PLAT_BRANCH))
-	[ -d $(TOP_DIR)/kernel ] || (git clone $(KERNEL_GIT) && cd kernel && git checkout $(KERNEL_BRANCH))
+	[ -d $(UEFI_DIR)/edk2-platform-baikal ] || (cd $(UEFI_DIR) && git clone $(EDK2_PLATFORM_SPECIFIC_GIT))
+	[ -d $(TOP_DIR)/kernel ] || (git clone $(KERNEL_GIT) kernel)
 else
 	[ -d $(TOP_DIR)/arm-tf ] || (mkdir arm-tf && cd $(SRC_ROOT)/arm-tf && cp -pR * $(TOP_DIR)/arm-tf)
 	[ -d $(UEFI_DIR)/edk2 ] || (mkdir -p $(UEFI_DIR)/edk2 && cd $(SRC_ROOT)/edk2 && cp -pR * $(UEFI_DIR)/edk2)

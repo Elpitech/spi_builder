@@ -8,6 +8,7 @@ rm -f basetools
 TOPDIR=`pwd`
 cd ${BIOS_WORKSPACE}
 export WORKSPACE=${BIOS_WORKSPACE}
+export BUILD_CC=gcc-10
 export EDK_TOOLS_PATH=${WORKSPACE}/edk2/BaseTools
 export PACKAGES_PATH=${WORKSPACE}/edk2:${WORKSPACE}/edk2-non-osi:${WORKSPACE}/edk2-platform-baikal
 . edk2/edksetup.sh || exit
