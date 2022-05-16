@@ -2,7 +2,10 @@
 How to build SPI image
 ======================
 
-1. Setup the kernel/arm-tf/edk2 source paths and cross tool path in the Makefile.
+1. Setup the kernel/arm-tf/edk2 source paths
+
+For cross tool you can use:
+sudo apt install gcc-aarch64-linux-gnu
 
 2. Build the image. By default, the ET101 image is built.
 
@@ -10,8 +13,8 @@ $ make 2>&1 | tee /tmp/make.log
 
 The resulting image is in img/et101.full.padded
 
-How to burn the image to ET101's SPI
-====================================
+Hardware flashing
+=================
 
 The following instructions assume the DB101-C programmer board is used.
 If using something else, please beware of the following:
@@ -47,6 +50,41 @@ $ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c MT25QU256 -w $BOARD.full.
 Upon success, type in BMC console:
 
 >:pins board_off
+
+Software flashing via UEFI application
+======================================
+
+Alternatively, you flash the image via UEFI shell with a dedicated software
+flasher. Build the image first. Next build the flashing UEFI app:
+
+$ make BOARD=et101-dp
+$ make SPI_FLASHER=1 BOARD=et101-dp uefi
+$ find . -name SpiFlashImage.efi
+
+SpiFlashImage.efi includes the flasher and the bundled *.flash.img file.
+
+- Create the USB flash stick with FAT32
+- Transfer the SpiFlashImage.efi EFI flashing module to USB. This
+  module contains the flasher and the ROM image.
+- Boot the board and go to the BIOS menu by pressing 'Esc'
+- Go to "Boot Manager"/"UEFI Shell"
+- Press 'Esc' to interrupt the booting and go to the interactive UEFI Shell
+- Go to the USB device (FS0) and run the flasher file:
+
+Shell> fs0:
+FS0:\> ./SpiFlashImage.efi
+
+Alternatively, if using the stand-alone flasher SpiFlash.efi, make sure you
+provide it with the *.flash.img file as argument. Other image formats are not
+suitable.
+
+FS0:\> ./SpiFlash.efi 0 et101-dp.flash.img
+
+- Once the flashing finishes with the 'success' message, reset the board:
+
+FS0:\> reset
+
+The board will boot, initialize its environment, and then will reboot again.
 
 Building/flashing for other boards
 ==================================

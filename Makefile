@@ -1,5 +1,7 @@
-CROSS ?= aarch64-linux-gnu-
+#CROSS ?= aarch64-linux-gnu-
+CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
 BOARD ?= et101
+SPI_FLASHER ?= 0
 
 SDK_VER := 5.4
 SDK_REV = 0x54
@@ -88,6 +90,9 @@ UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
 ifeq ($(BE_TARGET),mitx)
 	UEFI_FLAGS += -DBAIKAL_MITX=TRUE -DBOARD_VER=$(BOARD_VER)
 endif
+ifeq ($(SPI_FLASHER),1)
+UEFI_FLAGS += -DBUILD_UEFI_APPS=TRUE
+endif
 
 ARMTF_BUILD_DIR = $(ARMTF_DIR)/build/$(PLAT)/$(ARMTF_BUILD_TYPE)
 BL1_BIN = $(ARMTF_BUILD_DIR)/bl1.bin
@@ -120,7 +125,7 @@ uefi $(IMG_DIR)/$(BOARD).efi.fd: basetools
 	mkdir -p img
 	rm -f $(IMG_DIR)/$(BOARD).efi.fd
 	rm -rf $(UEFI_DIR)/Build
-	SDK_VER=$(SDK_VER) BIOS_WORKSPACE=$(UEFI_DIR) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" UEFI_PLATFORM="${UEFI_PLATFORM}" ./builduefi.sh
+	SDK_VER=$(SDK_VER) BIOS_WORKSPACE=$(UEFI_DIR) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" UEFI_PLATFORM="${UEFI_PLATFORM}" SPI_FLASHER=$(SPI_FLASHER) FLASH_IMG=${IMG_DIR}/${BOARD}.flash.img ./builduefi.sh
 	cp $(UEFI_DIR)/Build/Baikal/$(UEFI_BUILD_TYPE)_GCC5/FV/BAIKAL_EFI.fd $(IMG_DIR)/$(BOARD).efi.fd
 
 arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOARD).efi.fd
@@ -157,6 +162,6 @@ clean:
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
 
 distclean: clean
-	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools
+	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools img
 
 .PHONY: dtb uefi arm-tf bootrom
