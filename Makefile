@@ -7,11 +7,11 @@ SDK_VER := 5.4
 SDK_REV = 0x54
 PLAT = bm1000
 
-#KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.4-elp
+#KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
 #ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
 #EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
 
-KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git -b linux-5.4-elp
+KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git -b linux-5.10-elp
 ARMTF_GIT := git@gitlab.elpitech.ru:baikal-m/arm-tf.git -b $(SDK_VER)-elp
 EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elpitech.ru:baikal-m/edk2-platform-baikal.git -b $(SDK_VER)-elp
 
@@ -80,7 +80,7 @@ NCPU := $(shell nproc)
 IMG_DIR := $(CURDIR)/img
 
 #TARGET_CFG = $(BE_TARGET)_defconfig
-TARGET_CFG = et101_defconfig
+TARGET_CFG = bm1000_defconfig
 TARGET_DTB = baikal/bm-$(BOARD).dtb
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
 
