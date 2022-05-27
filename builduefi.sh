@@ -10,7 +10,7 @@ export EDK_TOOLS_PATH=${WORKSPACE}/edk2/BaseTools
 export GCC5_AARCH64_PREFIX=${CROSS}
 export ARCH=AARCH64
 export PACKAGES_PATH=${WORKSPACE}/edk2:${WORKSPACE}/edk2-non-osi:${WORKSPACE}/edk2-platform-baikal
-export PYTHON3_ENABLE=FALSE
+export PYTHON3_ENABLE=TRUE
 
 cd ${WORKSPACE}
 if ! [ -f edk2/Conf/target.txt ] ; then

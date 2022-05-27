@@ -3,9 +3,10 @@ CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-g
 BOARD ?= et101
 SPI_FLASHER ?= 0
 
-SDK_VER := 5.4
-SDK_REV = 0x54
+SDK_VER := 5.5
+SDK_REV = 0x55
 PLAT = bm1000
+EDK2_TAG = edk2-stable202202
 
 #KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
 #ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
@@ -39,16 +40,12 @@ else ifeq ($(BOARD),mitx-d-lvds)
 else ifeq ($(BOARD),e107)
 	BE_TARGET = mitx
 	BOARD_VER = 1
-else ifeq ($(BOARD),et101)
+else ifneq ($(filter et101-%,$(BOARD)),)
 	BE_TARGET = mitx
 	BOARD_VER = 2
-else ifeq ($(BOARD),et101-dp)
-	BE_TARGET = mitx
-	BOARD_VER = 2
+ifneq ($(filter %-dp,$(BOARD)),)
 	ARMTF_DEFS = "DP_ENABLE=1"
-else ifeq ($(BOARD),et101-lvds)
-	BE_TARGET = mitx
-	BOARD_VER = 2
+endif
 else ifeq ($(BOARD),et111)
 	BE_TARGET = mitx
 	BOARD_VER = 3
@@ -105,7 +102,7 @@ setup:
 ifeq ($(SRC_ROOT),)
 	mkdir -p $(UEFI_DIR)
 	[ -d $(TOP_DIR)/arm-tf ] || (git clone $(ARMTF_GIT))
-	[ -d $(UEFI_DIR)/edk2 ] || (cd $(UEFI_DIR) && git clone $(EDK2_GIT) && cd edk2 && git checkout 06dc822d045 && git submodule update --init)
+	[ -d $(UEFI_DIR)/edk2 ] || (cd $(UEFI_DIR) && git clone $(EDK2_GIT) && cd edk2 && git checkout $(EDK2_TAG) && git submodule update --init)
 	[ -d $(UEFI_DIR)/edk2-non-osi ] || (cd $(UEFI_DIR) && git clone $(EDK2_NON_OSI_GIT) && cd edk2-non-osi && git checkout master)
 	[ -d $(UEFI_DIR)/edk2-platform-baikal ] || (cd $(UEFI_DIR) && git clone $(EDK2_PLATFORM_SPECIFIC_GIT))
 	[ -d $(TOP_DIR)/kernel ] || (git clone $(KERNEL_GIT) kernel)
@@ -150,8 +147,8 @@ bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
 	mkdir -p $(KBUILD_DIR)
-	$(MAKE) -j$(NCPU) $(KERNEL_FLAGS) $(TARGET_CFG)
-	$(MAKE) -j$(NCPU) $(KERNEL_FLAGS) $(TARGET_DTB)
+	[ -f $(KBUILD_DIR)/Makefile ] || $(MAKE) $(KERNEL_FLAGS) $(TARGET_CFG)
+	cd $(KBUILD_DIR) && $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) $(TARGET_DTB)
 	cp $(KBUILD_DIR)/arch/$(ARCH)/boot/dts/$(TARGET_DTB) $(IMG_DIR)/$(BOARD).dtb
 
 clean:
