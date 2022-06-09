@@ -1,6 +1,8 @@
 #CROSS ?= aarch64-linux-gnu-
 CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
-BOARD ?= et101
+#BOARD ?= et101-v2-dp
+#BOARD ?= et101-lvds
+BOARD ?= et101-dp
 SPI_FLASHER ?= 0
 
 SDK_VER := 5.5

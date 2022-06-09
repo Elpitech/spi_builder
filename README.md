@@ -13,6 +13,10 @@ $ make 2>&1 | tee /tmp/make.log
 
 The resulting image is in img/et101.full.padded
 
+Building for a non-default board:
+$ make BOARD=et101-lvds
+$ make BOARD=et101-v2-dp
+
 Hardware flashing
 =================
 
@@ -72,13 +76,13 @@ SpiFlashImage.efi includes the flasher and the bundled *.flash.img file.
 - Go to the USB device (FS0) and run the flasher file:
 
 Shell> fs0:
-FS0:\> ./SpiFlashImage.efi
+FS0:\> SpiFlashImage.efi
 
 Alternatively, if using the stand-alone flasher SpiFlash.efi, make sure you
 provide it with the *.flash.img file as argument. Other image formats are not
 suitable.
 
-FS0:\> ./SpiFlash.efi 0 et101-dp.flash.img
+FS0:\> SpiFlash.efi 0 et101-dp.flash.img
 
 - Once the flashing finishes with the 'success' message, reset the board:
 
