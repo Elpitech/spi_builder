@@ -4,6 +4,7 @@ CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-g
 #BOARD ?= et101-lvds
 BOARD ?= et101-dp
 SPI_FLASHER ?= 0
+BDATE := $(shell date +%Y%m%d)
 #MAX_FREQ ?= 2133
 MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ =  $$(( $(MAX_FREQ) / 2))
@@ -37,9 +38,6 @@ ifeq ($(BOARD),mitx)
 	BE_TARGET = mitx
 	BOARD_VER = 0
 else ifeq ($(BOARD),mitx-d)
-	BE_TARGET = mitx
-	BOARD_VER = 2
-else ifeq ($(BOARD),mitx-d-lvds)
 	BE_TARGET = mitx
 	BOARD_VER = 2
 else ifeq ($(BOARD),e107)
@@ -149,7 +147,8 @@ arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOA
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
 bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
-	IMG_DIR=$(IMG_DIR) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) ./genrom.sh
+	mkdir -p out
+	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) ./genrom.sh
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
 	mkdir -p $(KBUILD_DIR)
@@ -162,9 +161,15 @@ clean:
 	rm -rf $(UEFI_DIR)/Build
 	rm -f basetools
 	rm -rf $(IMG_DIR)/$(BOARD).*
+	rm -rf img out
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
 
 distclean: clean
-	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools img
+	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools img out
+
+list:
+	@echo "BOARD=et101-lvds (et101-mb-1.1-rev1.1)"
+	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2)"
+	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev1.2)"
 
 .PHONY: dtb uefi arm-tf bootrom

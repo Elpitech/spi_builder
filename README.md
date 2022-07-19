@@ -14,8 +14,18 @@ $ make 2>&1 | tee /tmp/make.log
 The resulting image is in img/et101.full.padded
 
 Building for a non-default board:
+
+et101-mb-1.1-rev1.1:
 $ make BOARD=et101-lvds
+
+et101-mb-1.1-rev2: 
+$ make BOARD=et101-v2-lvds
+
+et101-mb-1.2-rev1.2:
 $ make BOARD=et101-v2-dp
+
+Non-default memory frequency:
+$ make BOARD=et101-v2-dp MAX_FREQ=2133
 
 Hardware flashing
 =================
