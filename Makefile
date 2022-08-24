@@ -170,6 +170,6 @@ distclean: clean
 list:
 	@echo "BOARD=et101-lvds (et101-mb-1.1-rev1.1)"
 	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2)"
-	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev1.2)"
+	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev2)"
 
 .PHONY: dtb uefi arm-tf bootrom

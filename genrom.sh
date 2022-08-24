@@ -16,7 +16,7 @@ case "${BOARD}" in
         MB="et101-mb-1.1-rev2"
         ;;
     et101-v2-dp)
-        MB="et101-mb-1.2-rev1.2"
+        MB="et101-mb-1.2-rev2"
         ;;
     *)
         MB="noname"

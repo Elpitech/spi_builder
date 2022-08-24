@@ -21,7 +21,7 @@ $ make BOARD=et101-lvds
 et101-mb-1.1-rev2: 
 $ make BOARD=et101-v2-lvds
 
-et101-mb-1.2-rev1.2:
+et101-mb-1.2-rev2 (same for et101-mb-1.2-rev1.2 with genuine stm32):
 $ make BOARD=et101-v2-dp
 
 Non-default memory frequency:
@@ -60,6 +60,8 @@ Run the commands
 
 # Burn full image, where BOARD is the target you have built.
 $ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c MT25QU256 -w $BOARD.full.padded
+If chip is not found, try a different one or omit -c option:
+$ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c W25Q256.W -w $BOARD.full.padded
 
 Upon success, type in BMC console:
 
