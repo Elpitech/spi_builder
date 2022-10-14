@@ -9,8 +9,8 @@ BDATE := $(shell date +%Y%m%d)
 MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ =  $$(( $(MAX_FREQ) / 2))
 
-SDK_VER := 5.5
-SDK_REV = 0x55
+SDK_VER := 5.6
+SDK_REV = 0x56
 PLAT = bm1000
 EDK2_TAG = edk2-stable202202
 
@@ -49,6 +49,12 @@ else ifneq ($(filter et101-%,$(BOARD)),)
 ifneq ($(filter %-dp,$(BOARD)),)
 	ARMTF_DEFS = "DP_ENABLE=1"
 endif
+else ifeq ($(BOARD),et151)
+	BE_TARGET = mitx
+	BOARD_VER = 2
+else ifeq ($(BOARD),et141)
+	BE_TARGET = mitx
+	BOARD_VER = 5
 else ifeq ($(BOARD),et111)
 	BE_TARGET = mitx
 	BOARD_VER = 3
@@ -56,6 +62,11 @@ else ifeq ($(BOARD),et111)
 else ifeq ($(BOARD),em407)
 	BE_TARGET = mitx
 	BOARD_VER = 4
+else ifeq ($(BOARD),et113)
+	BE_TARGET = dbs
+	PLAT = bs1000
+	DUAL_FLASH = yes
+	BOARD_VER = 6
 endif
 
 ARMTF_DEFS += "BAIKAL_DDR_CUSTOM_CLOCK_FREQ=$(BAIKAL_DDR_CUSTOM_CLOCK_FREQ)"
@@ -81,15 +92,20 @@ NCPU := $(shell nproc)
 IMG_DIR := $(CURDIR)/img
 
 #TARGET_CFG = $(BE_TARGET)_defconfig
-TARGET_CFG = bm1000_defconfig
-TARGET_DTB = baikal/bm-$(BOARD).dtb
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
 
 UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER)-$(MAX_FREQ) -DFIRMWARE_REVISION=$(SDK_REV)
-UEFI_PLATFORM = Platform/Baikal/BM1000Rdb/BM1000Rdb.dsc
 UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
 ifeq ($(BE_TARGET),mitx)
+	TARGET_CFG = bm1000_defconfig
+	TARGET_DTB = baikal/bm-$(BOARD).dtb
 	UEFI_FLAGS += -DBAIKAL_ELP=TRUE -DBOARD_VER=$(BOARD_VER)
+	UEFI_PLATFORM = Platform/Baikal/BM1000Rdb/BM1000Rdb.dsc
+else
+	TARGET_CFG = bm1000_defconfig
+	TARGET_DTB = baikal/bs-$(BOARD).dtb
+	UEFI_FLAGS += -DBAIKAL_ELP=TRUE -DBOARD_VER=$(BOARD_VER)
+	UEFI_PLATFORM = Platform/Baikal/BS1000Rdb/BS1000Rdb.dsc
 endif
 ifeq ($(SPI_FLASHER),1)
 UEFI_FLAGS += -DBUILD_UEFI_APPS=TRUE
@@ -148,7 +164,7 @@ arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOA
 
 bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
 	mkdir -p out
-	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) ./genrom.sh
+	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) PLAT=$(PLAT) ./genrom.sh
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
 	mkdir -p $(KBUILD_DIR)

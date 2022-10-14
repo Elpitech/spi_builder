@@ -19,7 +19,7 @@ case "${BOARD}" in
         MB="et101-mb-1.2-rev2"
         ;;
     *)
-        MB="noname"
+        MB="${BOARD}"
         ;;
 esac
 FLASH_IMG=./out/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.flash.img
@@ -46,11 +46,14 @@ if [[ ${DUAL_FLASH} = 'no' ]]; then
 	echo "001c0000:007fffff fip" >> ${LAYOUT}
 	echo "00800000:01ffffff fat" >> ${LAYOUT}
 else
+	if [ "${PLAT}" = "bs1000" ] ; then
+		echo 1fc00 0f 1f 2f 3f 4f 5f 6f 7f 8f 9f af bf | xxd -r  - ${FLASH_IMG}
+	fi
 	dd if=${FLASH_IMG} of=${PADDED} conv=notrunc || exit
 	echo "00000000:0003ffff bl1" > ${LAYOUT}
-	echo "00040000:0004ffff dtb" >> ${LAYOUT}
-	echo "00050000:0010ffff vars" >> ${LAYOUT}
-	echo "00110000:007fffff fip" >> ${LAYOUT}
+	echo "00040000:0007ffff dtb" >> ${LAYOUT}
+	echo "00080000:000bffff vars" >> ${LAYOUT}
+	echo "000c0000:007fffff fip" >> ${LAYOUT}
 	echo "00800000:01ffffff fat" >> ${LAYOUT}
 fi
 
