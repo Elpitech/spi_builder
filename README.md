@@ -2,29 +2,46 @@
 How to build SPI image
 ======================
 
-1. Setup the kernel/arm-tf/edk2 source paths
+1. Setup the kernel/arm-tf/edk2 source paths in the Makefile
 
-For cross tool you can use:
-sudo apt install gcc-aarch64-linux-gnu
+For example:
+KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
+ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
+EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
 
-2. Build the image. By default, the ET101 image is built.
+2. Build the image.
+
+By default, the image is built for the ET101-MB-1.2 rev2 board (the board with
+DP/HDMI ports and the HK clone of stm32).
 
 $ make 2>&1 | tee /tmp/make.log
 
-The resulting image is in img/et101.full.padded
+The resulting image is in the ./out dir:
+*.full.padded - image for h/w programmer, padded with zeros
+*.flash.img - image for software flashing via UEFI Shell
 
 Building for a non-default board:
 
-et101-mb-1.1-rev1.1:
-$ make BOARD=et101-lvds
+List available targets
+$ make list
 
-et101-mb-1.1-rev2: 
+HDMI/LVDS board et101-mb-1.1-rev2 (same for et101-mb-1.1-rev1.1 with genuine stm32):
 $ make BOARD=et101-v2-lvds
 
-et101-mb-1.2-rev2 (same for et101-mb-1.2-rev1.2 with genuine stm32):
+HDMI/DP board et101-mb-1.2-rev2 (same for et101-mb-1.2-rev1.2 with genuine stm32):
 $ make BOARD=et101-v2-dp
 
-Non-default memory frequency:
+The couple of earlier boards with genuine stm32 chips have dedicated *.dts files
+with some extended functionality not available on the clones.  These boards are
+not manufactured anymore, but you can build dedicated images for them anyways:
+
+et101-mb-1.1-rev1.1:
+$ make BOARD=et101-lvds
+et101-mb-1.2-rev1.2 
+$ make BOARD=et101-dp
+
+Sometimes RAM modules do not work well with the default 2400 frequency.  In this
+case, you can build an image with non-default (reduced) memory frequency:
 $ make BOARD=et101-v2-dp MAX_FREQ=2133
 
 Hardware flashing

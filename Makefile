@@ -1,8 +1,7 @@
 #CROSS ?= aarch64-linux-gnu-
 CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
-#BOARD ?= et101-v2-dp
-#BOARD ?= et101-lvds
-BOARD ?= et101-dp
+BOARD ?= et101-v2-dp
+#BOARD ?= et101-v2-lvds
 SPI_FLASHER ?= 0
 BDATE := $(shell date +%Y%m%d)
 #MAX_FREQ ?= 2133
@@ -184,8 +183,8 @@ distclean: clean
 	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools img out
 
 list:
-	@echo "BOARD=et101-lvds (et101-mb-1.1-rev1.1)"
-	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2)"
-	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev2)"
+	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2 or et101-mb-1.1-rev1.1)"
+	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev2 or et101-mb-1.2-rev1.2)"
+	@echo "BOARD=mitx-d (tf307-mb-s-d-rev4.0)"
 
 .PHONY: dtb uefi arm-tf bootrom
