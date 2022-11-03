@@ -63,7 +63,7 @@ else ifeq ($(BOARD),em407)
 	BE_TARGET = mitx
 	BOARD_VER = 4
 else ifeq ($(BOARD),et113)
-	BE_TARGET = dbs
+	BE_TARGET = elp
 	PLAT = bs1000
 	DUAL_FLASH = yes
 	BOARD_VER = 6
