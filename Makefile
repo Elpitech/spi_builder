@@ -89,6 +89,7 @@ ARCH = arm64
 NCPU := $(shell nproc)
 
 IMG_DIR := $(CURDIR)/img
+REL_DIR := $(CURDIR)/release
 
 #TARGET_CFG = $(BE_TARGET)_defconfig
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
@@ -162,8 +163,8 @@ arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOA
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
 bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
-	mkdir -p out
-	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) PLAT=$(PLAT) ./genrom.sh
+	mkdir -p $(REL_DIR)
+	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) PLAT=$(PLAT) IMG_DIR=$(IMG_DIR) REL_DIR=$(REL_DIR) ./genrom.sh
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
 	mkdir -p $(KBUILD_DIR)
@@ -175,8 +176,7 @@ clean:
 	rm -rf $(KBUILD_DIR)
 	rm -rf $(UEFI_DIR)/Build
 	rm -f basetools
-	rm -rf $(IMG_DIR)/$(BOARD).*
-	rm -rf img out
+	rm -rf $(IMG_DIR) $(REL_DIR)
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
 
 distclean: clean

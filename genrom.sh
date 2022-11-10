@@ -6,7 +6,7 @@ DTB_SIZE=$(( 4 * 65536 ))
 UEFI_VARS_SIZE=$(( 12 * 65536 ))
 LINUX_PART_START=$(( 8 * 1024 * 1024 ))
 FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESERVED_SIZE)))
-FIP_BIN=./img/${BOARD}.fip.bin
+FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
 
 case "${BOARD}" in
     et101-lvds)
@@ -25,14 +25,14 @@ case "${BOARD}" in
         MB="${BOARD}"
         ;;
 esac
-FLASH_IMG=./out/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.flash.img
-PADDED=./out/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.full.padded
-LAYOUT=./img/${MB}.layout
+FLASH_IMG=${REL_DIR}/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.flash.img
+PADDED=${REL_DIR}/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.full.padded
+LAYOUT=${IMG_DIR}/${MB}.layout
 
-cp -f ./img/${BOARD}.bl1.bin ${FLASH_IMG} || exit
+cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit
 chmod a-x ${FLASH_IMG}
 truncate --no-create --size=${BL1_RESERVED_SIZE} ${FLASH_IMG} || exit
-cat ./img/${BOARD}.dtb >> ${FLASH_IMG} || exit
+cat ${IMG_DIR}/${BOARD}.dtb >> ${FLASH_IMG} || exit
 truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE)) ${FLASH_IMG} || exit
 truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE + $UEFI_VARS_SIZE)) ${FLASH_IMG} || exit
 cat ${FIP_BIN} >> ${FLASH_IMG} || exit
@@ -40,8 +40,8 @@ cat ${FIP_BIN} >> ${FLASH_IMG} || exit
 dd if=/dev/zero bs=1M count=32 | tr "\000" "\377" > ${PADDED} || exit
 if [[ ${DUAL_FLASH} = 'no' ]]; then
 	# add 512 KB SCP image; 0.5 + 8 + 23.5 = 32 MB total flash size
-	cat ${SCP_BLOB} ${FLASH_IMG} > ./img/${MB}.full.img
-	dd if=./img/${MB}.full.img of=${PADDED} conv=notrunc || exit
+	cat ${SCP_BLOB} ${FLASH_IMG} > ${IMG_DIR}/${MB}.full.img
+	dd if=${IMG_DIR}/${MB}.full.img of=${PADDED} conv=notrunc || exit
 	echo "00000000:0007ffff scp" > ${LAYOUT}
 	echo "00080000:000bffff bl1" >> ${LAYOUT}
 	echo "000c0000:000fffff dtb" >> ${LAYOUT}
