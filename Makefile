@@ -1,5 +1,5 @@
-#CROSS ?= aarch64-linux-gnu-
-CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
+CROSS ?= aarch64-linux-gnu-
+#CROSS = $(HOME)/toolchains/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-
 BOARD ?= et101-v2-dp
 #BOARD ?= et101-v2-lvds
 SPI_FLASHER ?= 0
@@ -186,5 +186,12 @@ list:
 	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2 or et101-mb-1.1-rev1.1)"
 	@echo "BOARD=et101-v2-dp (et101-mb-1.2-rev2 or et101-mb-1.2-rev1.2)"
 	@echo "BOARD=mitx-d (tf307-mb-s-d-rev4.0)"
+	@echo "BOARD=mitx"
+	@echo "BOARD=em407"
+	@echo "BOARD=e107"
+	@echo "BOARD=et111 (notebook)"
+	@echo "BOARD=et113"
+	@echo "BOARD=et141"
+	@echo "BOARD=et151 (et151-MB_Rev.1)"
 
 .PHONY: dtb uefi arm-tf bootrom
