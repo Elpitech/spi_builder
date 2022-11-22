@@ -1,0 +1,38 @@
+image: $CI_REGISTRY/lpt/containers/common-firmware-builder:0-0-3
+
+stages:
+  - build
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+.build_firmware_template: &build_firmware_dfn
+  stage: build
+  script:
+    - make BOARD=${BOARD} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
+    - |
+      BRANCH=""
+      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
+        if [ -n "${CI_COMMIT_BRANCH}" ]; then
+          BRANCH="${CI_COMMIT_BRANCH}_"
+        fi
+      fi
+      VERSION=$(git describe --tags)
+      [ x${ARMTF_DEBUG} = x"y" ] && VERSION=${VERSION}-armtfdbg
+      [ x${UEFI_DEBUG} = x"y" ] && VERSION=${VERSION}-uefidbg
+      echo "Uploading version ${VERSION}"
+      echo "          branch ${BRANCH}"
+      echo "          board ${BOARD}"
+      GIT_TAG=$(git describe --tags --no-abbrev)
+      FULL_PATH="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/firmware/${GIT_TAG}/${BRANCH}${BOARD}_${VERSION}"
+      echo "Full path: ${FULL_PATH}"
+      tar caf file.tar.gz release
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file file.tar.gz ${FULL_PATH}.file.tar.gz
+
+release-firmware-et101-v2-dp:
+  variables:
+    BOARD: et101-v2-dp
+    ARMTF_DEBUG: "no"
+    UEFI_DEBUG: "no"
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
