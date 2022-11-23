@@ -18,8 +18,8 @@ variables:
         fi
       fi
       VERSION=$(git describe --tags)
-      [ x${ARMTF_DEBUG} = x"y" ] && VERSION=${VERSION}-armtfdbg
-      [ x${UEFI_DEBUG} = x"y" ] && VERSION=${VERSION}-uefidbg
+      [ ${ARMTF_DEBUG} -eq 1 ] && VERSION=${VERSION}-armtfdbg
+      [ ${UEFI_DEBUG} -eq 1 ] && VERSION=${VERSION}-uefidbg
       echo "Uploading version ${VERSION}"
       echo "          branch ${BRANCH}"
       echo "          board ${BOARD}"
@@ -32,7 +32,7 @@ variables:
 release-firmware-et101-v2-dp:
   variables:
     BOARD: et101-v2-dp
-    ARMTF_DEBUG: "no"
-    UEFI_DEBUG: "no"
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
     MAX_FREQ: 2400
   <<: *build_firmware_dfn
