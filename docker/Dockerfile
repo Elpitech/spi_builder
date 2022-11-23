@@ -1,7 +1,6 @@
 FROM debian:bullseye-slim
 MAINTAINER Nick Zhuravlev <nikolay.zhuravlev@elpitech.ru>
 
-# RUN echo 'Acquire::http::Proxy "http://user:pass@proxy30.tp-local.ru:3128";' > /etc/apt/apt.conf.d/1-proxy
 RUN apt-get update \
     && apt-get -y -q install \
         crossbuild-essential-mipsel build-essential git fakeroot \
@@ -10,6 +9,7 @@ RUN apt-get update \
         qemu-user-static debootstrap sudo crossbuild-essential-arm64 \
         nasm iasl python3-distutils texinfo subversion imagemagick xxd librsvg2-bin \
 		uuid-dev libgmp3-dev libmpfr-dev libarchive-zip-perl curl \
+		gcc-10 acpica-tools xz-utils lsb-release \
     && apt-get clean
 
 # Not sure why en_US is missing, create it

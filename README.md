@@ -2,7 +2,12 @@
 How to build SPI image
 ======================
 
-Build dependencies: gcc-10 acpica-tools crossbuild-essential-arm64 nasm iasl device-tree-compiler python3-distutils texinfo git subversion imagemagick xxd flex bison librsvg2-bin xz-utils uuid-dev libgmp3-dev libmpfr-dev libarchive-zip-perl libssl-dev curl
+Install build dependencies:
+
+apt install gcc-10 acpica-tools crossbuild-essential-arm64 nasm \
+iasl device-tree-compiler python3-distutils texinfo git subversion \
+imagemagick xxd flex bison librsvg2-bin xz-utils uuid-dev libgmp3-dev \
+libmpfr-dev libarchive-zip-perl libssl-dev curl
 
 1. Setup the kernel/arm-tf/edk2 source paths in the Makefile
 
