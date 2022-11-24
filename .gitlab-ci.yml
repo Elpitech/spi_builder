@@ -1,0 +1,37 @@
+image: $CI_REGISTRY/baikal-m/spi_builder:1.0
+
+stages:
+  - build
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+.build_firmware_template: &build_firmware_dfn
+  stage: build
+  script:
+    - make BOARD=${BOARD} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
+    - |
+      BRANCH=""
+      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
+        if [ -n "${CI_COMMIT_BRANCH}" ]; then
+          BRANCH="${CI_COMMIT_BRANCH}_"
+        fi
+      fi
+      VERSION=$(git describe --tags)
+      [ ${ARMTF_DEBUG} -eq 1 ] && VERSION=${VERSION}-armtfdbg
+      [ ${UEFI_DEBUG} -eq 1 ] && VERSION=${VERSION}-uefidbg
+      echo "Uploading version ${VERSION}"
+      echo "          branch ${BRANCH}"
+      echo "          board ${BOARD}"
+      GIT_TAG=$(git describe --tags --no-abbrev)
+      FULL_PATH="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/firmware/${GIT_TAG}/${BRANCH}${BOARD}_${VERSION}"
+      echo "Full path: ${FULL_PATH}"
+      tar cf - -C release/${BOARD} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.gz
+
+release-firmware-et101-v2-dp:
+  variables:
+    BOARD: et101-v2-dp
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn

@@ -7,6 +7,7 @@ UEFI_VARS_SIZE=$(( 12 * 65536 ))
 LINUX_PART_START=$(( 8 * 1024 * 1024 ))
 FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESERVED_SIZE)))
 FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
+RELTAG=$(git describe --tags)
 
 case "${BOARD}" in
     et101-lvds)
@@ -25,8 +26,8 @@ case "${BOARD}" in
         MB="${BOARD}"
         ;;
 esac
-FLASH_IMG=${REL_DIR}/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.flash.img
-PADDED=${REL_DIR}/${MB}-${SDK_VER}-${MAX_FREQ}-${BDATE}.full.padded
+FLASH_IMG=${REL_DIR}/${BOARD}/${MB}-${SDK_VER}-${MAX_FREQ}-${RELTAG}.flash.img
+PADDED=${REL_DIR}/${BOARD}/${MB}-${SDK_VER}-${MAX_FREQ}-${RELTAG}.full.padded
 LAYOUT=${IMG_DIR}/${MB}.layout
 
 cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit

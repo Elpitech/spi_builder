@@ -3,7 +3,6 @@ CROSS ?= aarch64-linux-gnu-
 BOARD ?= et101-v2-dp
 #BOARD ?= et101-v2-lvds
 SPI_FLASHER ?= 0
-BDATE := $(shell date +%Y%m%d)
 #MAX_FREQ ?= 2133
 MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ =  $$(( $(MAX_FREQ) / 2))
@@ -27,6 +26,7 @@ TOP_DIR := $(shell pwd)
 ARMTF_DIR := $(TOP_DIR)/arm-tf
 UEFI_DIR := $(TOP_DIR)/uefi
 KBUILD_DIR := $(TOP_DIR)/kbuild
+KERN_DIR := $(TOP_DIR)/kernel
 
 # Newer UEFI in SDK 5.1 is coupled with the upstream code. Only
 # platform-specific part comes from our sources.
@@ -92,7 +92,7 @@ IMG_DIR := $(CURDIR)/img
 REL_DIR := $(CURDIR)/release
 
 #TARGET_CFG = $(BE_TARGET)_defconfig
-KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(TOP_DIR)/kernel
+KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(KERN_DIR)
 
 UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER)-$(MAX_FREQ) -DFIRMWARE_REVISION=$(SDK_REV)
 UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
@@ -118,28 +118,26 @@ FIP_BIN = $(ARMTF_BUILD_DIR)/fip.bin
 all: setup bootrom
 
 setup:
-	mkdir -p img
+	mkdir -p $(IMG_DIR)
+	mkdir -p $(REL_DIR)/${BOARD}
+	mkdir -p $(KBUILD_DIR)
 ifeq ($(SRC_ROOT),)
-	mkdir -p $(UEFI_DIR)
-	[ -d $(TOP_DIR)/arm-tf ] || (git clone $(ARMTF_GIT))
-	[ -d $(UEFI_DIR)/edk2 ] || (cd $(UEFI_DIR) && git clone $(EDK2_GIT) && cd edk2 && git checkout $(EDK2_TAG) && git submodule update --init)
-	[ -d $(UEFI_DIR)/edk2-non-osi ] || (cd $(UEFI_DIR) && git clone $(EDK2_NON_OSI_GIT) && cd edk2-non-osi && git checkout master)
-	[ -d $(UEFI_DIR)/edk2-platform-baikal ] || (cd $(UEFI_DIR) && git clone $(EDK2_PLATFORM_SPECIFIC_GIT))
-	[ -d $(TOP_DIR)/kernel ] || (git clone $(KERNEL_GIT) kernel)
 else
-	[ -d $(TOP_DIR)/arm-tf ] || (mkdir arm-tf && cd $(SRC_ROOT)/arm-tf && cp -pR * $(TOP_DIR)/arm-tf)
-	[ -d $(UEFI_DIR)/edk2 ] || (mkdir -p $(UEFI_DIR)/edk2 && cd $(SRC_ROOT)/edk2 && cp -pR * $(UEFI_DIR)/edk2)
-	[ -d $(UEFI_DIR)/edk2-non-osi ] || (mkdir $(UEFI_DIR)/edk2-non-osi && cd $(SRC_ROOT)/edk2-non-osi && cp -pR * $(UEFI_DIR)/edk2-non-osi)
-	[ -d $(UEFI_DIR)/edk2-platform-baikal ] || (mkdir $(UEFI_DIR)/edk2-platform-baikal && cd $(SRC_ROOT)/edk2-platform-baikal && cp -pR * $(UEFI_DIR)/edk2-platform-baikal)
-	[ -d $(TOP_DIR)/kernel ] || (mkdir $(TOP_DIR)/kernel && mkdir -p $(KBUILD_DIR) && cd $(SRC_ROOT)/kernel && cp -pR * $(TOP_DIR)/kernel)
+	[ -f $(ARMTF_DIR)/.git ] || (cp -pR $(SRC_ROOT)/arm-tf/* $(ARMTF_DIR))
+	[ -f $(UEFI_DIR)/edk2/.git ] || (cp -pR $(SRC_ROOT)/edk2/* $(UEFI_DIR)/edk2)
+	[ -f $(UEFI_DIR)/edk2-non-osi/.git ] || (cp -pR $(SRC_ROOT)/edk2-non-osi/* $(UEFI_DIR)/edk2-non-osi)
+	[ -f $(UEFI_DIR)/edk2-platform-baikal/.git ] || (cp -pR $(SRC_ROOT)/edk2-platform-baikal/* $(UEFI_DIR)/edk2-platform-baikal)
+	[ -f $(KERN_DIR)/.git ] || (cp -pR $(SRC_ROOT)/kernel/* $(KERN_DIR))
 endif
+
+modules:
+	git submodule update --init --recursive
 
 # Note: BaseTools cannot be built in parallel.
 basetools:
 	BIOS_WORKSPACE=$(UEFI_DIR) ./buildbasetools.sh
 
 uefi $(IMG_DIR)/$(BOARD).efi.fd: basetools
-	mkdir -p img
 	rm -f $(IMG_DIR)/$(BOARD).efi.fd
 	rm -rf $(UEFI_DIR)/Build
 	BIOS_WORKSPACE=$(UEFI_DIR) CROSS=$(CROSS) BUILD_TYPE=$(UEFI_BUILD_TYPE) UEFI_FLAGS="$(UEFI_FLAGS)" UEFI_PLATFORM="${UEFI_PLATFORM}" SPI_FLASHER=$(SPI_FLASHER) FLASH_IMG=${IMG_DIR}/${BOARD}.flash.img ./builduefi.sh
@@ -163,8 +161,7 @@ arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOA
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
 bootrom: $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).dtb
-	mkdir -p $(REL_DIR)
-	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) BDATE=$(BDATE) MAX_FREQ=$(MAX_FREQ) PLAT=$(PLAT) IMG_DIR=$(IMG_DIR) REL_DIR=$(REL_DIR) ./genrom.sh
+	SDK_VER=$(SDK_VER) BOARD=$(BOARD) SCP_BLOB=$(SCP_BLOB) DUAL_FLASH=$(DUAL_FLASH) MAX_FREQ=$(MAX_FREQ) PLAT=$(PLAT) IMG_DIR=$(IMG_DIR) REL_DIR=$(REL_DIR) ./genrom.sh
 
 dtb $(IMG_DIR)/$(BOARD).dtb: 
 	mkdir -p $(KBUILD_DIR)
@@ -180,7 +177,7 @@ clean:
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
 
 distclean: clean
-	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KBUILD_DIR) $(TOP_DIR)/kernel basetools img out
+	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KERN_DIR)
 
 list:
 	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2 or et101-mb-1.1-rev1.1)"
