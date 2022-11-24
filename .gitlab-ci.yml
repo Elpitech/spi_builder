@@ -28,10 +28,75 @@ variables:
       echo "Full path: ${FULL_PATH}"
       tar cf - -C release/${BOARD} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.gz
 
-release-firmware-et101-v2-dp:
+et151-mb-1.1-rev1:
+  variables:
+    BOARD: et151
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et101-mb-1.2-rev2:
   variables:
     BOARD: et101-v2-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
   <<: *build_firmware_dfn
+
+et101-mb-1.1-rev2:
+  variables:
+    BOARD: et101-v2-lvds
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et101-mb-1.1-rev1.1:
+  variables:
+    BOARD: et101-lvds
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+tf307-mb-s-d-rev4.0:
+  variables:
+    BOARD: mitx-d
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+em407-com-express:
+  variables:
+    BOARD: em407
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et111-laptop:
+  variables:
+    BOARD: et111
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et113-mb-a-server:
+  variables:
+    BOARD: et113
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et141-ramac-2x-pcie-dtx:
+  variables:
+    BOARD: et141
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+

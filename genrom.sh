@@ -10,6 +10,9 @@ FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
 RELTAG=$(git describe --tags)
 
 case "${BOARD}" in
+    et151)
+        MB="et151-mb-1.1-rev1"
+        ;;
     et101-lvds)
         MB="et101-mb-1.1-rev1.1"
         ;;
@@ -21,6 +24,18 @@ case "${BOARD}" in
         ;;
     mitx-d)
         MB="tf307-mb-s-d-rev4.0"
+        ;;
+    em407)
+        MB="em407-com-express"
+        ;;
+    et111)
+        MB="et111-laptop"
+        ;;
+    et113)
+        MB="et113-mb-a-server"
+        ;;
+    et141)
+        MB="et141-ramac-2x-pcie-dtx"
         ;;
     *)
         MB="${BOARD}"
