@@ -192,3 +192,31 @@ list:
 	@echo "BOARD=et151 (et151-MB_Rev.1)"
 
 .PHONY: dtb uefi arm-tf bootrom
+
+#
+# Repository rules
+#
+
+.PHONY: gitclean
+gitclean:
+	git clean -xfd
+	git submodule foreach --recursive git clean -xfd
+
+.PHONY: gitreset
+gitreset:
+	git reset --hard
+	git submodule foreach --recursive git reset --hard
+
+.PHONY: gitinit
+gitinit:
+	git submodule sync --recursive
+	git submodule update --recursive --init --depth=1
+
+.PHONY: gitfree
+gitdrop:
+	git submodule deinit --all
+
+.PHONY: gitdist
+gitdist:
+	tar $(addprefix --exclude=,.git .gitignore .gitmodules .gitreview .azurepipelines build firmware-baikal-m.tar.xz) -cavf firmware-baikal-m.tar.xz .
+

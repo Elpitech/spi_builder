@@ -9,7 +9,7 @@ RUN apt-get update \
         qemu-user-static debootstrap sudo crossbuild-essential-arm64 \
         nasm iasl python3-distutils texinfo subversion imagemagick xxd librsvg2-bin \
 		uuid-dev libgmp3-dev libmpfr-dev libarchive-zip-perl curl \
-		gcc-10 acpica-tools xz-utils lsb-release \
+		gcc-10 acpica-tools xz-utils lsb-release bc rsync kmod cpio \
     && apt-get clean
 
 # Not sure why en_US is missing, create it
