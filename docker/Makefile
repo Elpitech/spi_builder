@@ -1,5 +1,5 @@
 IMAGE := baikal-m/spi_builder
-TAG := 1.0
+TAG := 1.1
 SRCROOT := /home/ndz/gitlab
 NAME := builder11
 
