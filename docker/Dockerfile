@@ -1,8 +1,9 @@
 FROM debian:bullseye-slim
 MAINTAINER Nick Zhuravlev <nikolay.zhuravlev@elpitech.ru>
 
-RUN apt-get update \
-    && apt-get -y -q install \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y
+RUN apt-get -y -q install \
         crossbuild-essential-mipsel build-essential git fakeroot \
         libncurses-dev libssl-dev libelf-dev bison flex vim device-tree-compiler \
         sloccount cppcheck gcc-arm-none-eabi python gcc-aarch64-linux-gnu \
