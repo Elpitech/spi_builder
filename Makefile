@@ -12,9 +12,9 @@ SDK_REV = 0x56
 PLAT = bm1000
 EDK2_TAG = edk2-stable202202
 
-#KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
-#ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
-#EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
+#KERNEL_GIT := https://github.com/Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
+#ARMTF_GIT := https://github.com/Elpitech/arm-tf.git -b $(SDK_VER)-elp
+#EDK2_PLATFORM_SPECIFIC_GIT := https://github.com/Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
 
 KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git -b linux-5.10-elp
 ARMTF_GIT := git@gitlab.elpitech.ru:baikal-m/arm-tf.git -b $(SDK_VER)-elp
@@ -137,6 +137,10 @@ modules:
 basetools:
 	BIOS_WORKSPACE=$(UEFI_DIR) ./buildbasetools.sh
 
+basetools-clean:
+	BIOS_WORKSPACE=$(UEFI_DIR) ./buildbasetools.sh clean
+	rm basetools
+
 uefi $(IMG_DIR)/$(BOARD).efi.fd: basetools
 	rm -f $(IMG_DIR)/$(BOARD).efi.fd
 	rm -rf $(UEFI_DIR)/Build
@@ -169,7 +173,7 @@ dtb $(IMG_DIR)/$(BOARD).dtb:
 	cd $(KBUILD_DIR) && $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) $(TARGET_DTB)
 	cp $(KBUILD_DIR)/arch/$(ARCH)/boot/dts/$(TARGET_DTB) $(IMG_DIR)/$(BOARD).dtb
 
-clean:
+clean: basetools-clean
 	rm -rf $(KBUILD_DIR)
 	rm -rf $(UEFI_DIR)/Build
 	rm -f basetools
