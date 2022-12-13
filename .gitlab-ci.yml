@@ -52,14 +52,6 @@ et101-mb-1.1-rev2:
     MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
-et101-mb-1.1-rev1.1:
-  variables:
-    BOARD: et101-lvds
-    ARMTF_DEBUG: 0
-    UEFI_DEBUG: 0
-    MAX_FREQ: 2400
-  <<: *build_firmware_dfn
-
 tf307-mb-s-d-rev4.0:
   variables:
     BOARD: mitx-d
