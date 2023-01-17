@@ -7,7 +7,11 @@ UEFI_VARS_SIZE=$(( 12 * 65536 ))
 LINUX_PART_START=$(( 8 * 1024 * 1024 ))
 FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESERVED_SIZE)))
 FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
-RELTAG=$(git describe --tags)
+if [ -d .git ] ; then
+	RELTAG=$(git describe --tags)
+else
+	RELTAG=$(date +%Y%m%d)
+fi
 
 case "${BOARD}" in
     et151)
@@ -41,8 +45,14 @@ case "${BOARD}" in
         MB="${BOARD}"
         ;;
 esac
-FLASH_IMG=${REL_DIR}/${BOARD}/${MB}-${SDK_VER}-${MAX_FREQ}-${RELTAG}.flash.img
-PADDED=${REL_DIR}/${BOARD}/${MB}-${SDK_VER}-${MAX_FREQ}-${RELTAG}.full.padded
+
+if [ -n "${MAX_FREQ}" ] ; then
+	SUFFIX=${SDK_VER}-${MAX_FREQ}-${RELTAG}
+else
+	SUFFIX=${SDK_VER}-${RELTAG}
+fi
+FLASH_IMG=${REL_DIR}/${BOARD}/${MB}-${SUFFIX}.flash.img
+PADDED=${REL_DIR}/${BOARD}/${MB}-${SUFFIX}.full.padded
 LAYOUT=${IMG_DIR}/${MB}.layout
 
 cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit
@@ -54,7 +64,7 @@ truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE + $UEFI_VARS_SIZE)
 cat ${FIP_BIN} >> ${FLASH_IMG} || exit
 
 dd if=/dev/zero bs=1M count=32 | tr "\000" "\377" > ${PADDED} || exit
-if [[ ${DUAL_FLASH} = 'no' ]]; then
+if [ ${DUAL_FLASH} = 'no' ]; then
 	# add 512 KB SCP image; 0.5 + 8 + 23.5 = 32 MB total flash size
 	cat ${SCP_BLOB} ${FLASH_IMG} > ${IMG_DIR}/${MB}.full.img
 	dd if=${IMG_DIR}/${MB}.full.img of=${PADDED} conv=notrunc || exit

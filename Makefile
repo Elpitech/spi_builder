@@ -5,12 +5,12 @@ BOARD ?= et101-v2-dp
 SPI_FLASHER ?= 0
 #MAX_FREQ ?= 2133
 MAX_FREQ ?= 2400
-BAIKAL_DDR_CUSTOM_CLOCK_FREQ =  $$(( $(MAX_FREQ) / 2))
+BAIKAL_DDR_CUSTOM_CLOCK_FREQ = $(shell expr $(MAX_FREQ) / 2)
 
-SDK_VER := 5.6
-SDK_REV = 0x56
+SDK_VER := 5.7
+SDK_REV = 0x57
 PLAT = bm1000
-EDK2_TAG = edk2-stable202202
+EDK2_TAG = edk2-stable202208
 
 #KERNEL_GIT := https://github.com/Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
 #ARMTF_GIT := https://github.com/Elpitech/arm-tf.git -b $(SDK_VER)-elp
@@ -34,38 +34,38 @@ EDK2_GIT := http://github.com/tianocore/edk2.git
 EDK2_NON_OSI_GIT := https://github.com/tianocore/edk2-non-osi.git
 
 ifeq ($(BOARD),mitx)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 0
 else ifeq ($(BOARD),mitx-d)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 2
 else ifeq ($(BOARD),e107)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 1
 else ifneq ($(filter et101-%,$(BOARD)),)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 2
-ifneq ($(filter %-dp,$(BOARD)),)
-	ARMTF_DEFS = "DP_ENABLE=1"
-endif
 else ifeq ($(BOARD),et151)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 2
 else ifeq ($(BOARD),et141)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 5
+else ifeq ($(BOARD),et121)
+	BE_TARGET = elp_bm
+	BOARD_VER = 7
 else ifeq ($(BOARD),et111)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 3
-	ARMTF_DEFS = "EDP_ENABLE=1"
 else ifeq ($(BOARD),em407)
-	BE_TARGET = mitx
+	BE_TARGET = elp_bm
 	BOARD_VER = 4
 else ifeq ($(BOARD),et113)
-	BE_TARGET = elp
+	BE_TARGET = elp_bs
 	PLAT = bs1000
 	DUAL_FLASH = yes
 	BOARD_VER = 6
+	MAX_FREQ = ""
 endif
 
 ARMTF_DEFS += "BAIKAL_DDR_CUSTOM_CLOCK_FREQ=$(BAIKAL_DDR_CUSTOM_CLOCK_FREQ)"
@@ -94,9 +94,13 @@ REL_DIR := $(CURDIR)/release
 #TARGET_CFG = $(BE_TARGET)_defconfig
 KERNEL_FLAGS = O=$(KBUILD_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS) -C $(KERN_DIR)
 
-UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER)-$(MAX_FREQ) -DFIRMWARE_REVISION=$(SDK_REV)
+ifneq ($(MAX_FREQ),)
+	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER)-$(MAX_FREQ) -DFIRMWARE_REVISION=$(SDK_REV)
+else
+	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
+endif
 UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
-ifeq ($(BE_TARGET),mitx)
+ifeq ($(BE_TARGET),elp_bm)
 	TARGET_CFG = bm1000_defconfig
 	TARGET_DTB = baikal/bm-$(BOARD).dtb
 	UEFI_FLAGS += -DBAIKAL_ELP=TRUE -DBOARD_VER=$(BOARD_VER)
@@ -106,9 +110,6 @@ else
 	TARGET_DTB = baikal/bs-$(BOARD).dtb
 	UEFI_FLAGS += -DBAIKAL_ELP=TRUE -DBOARD_VER=$(BOARD_VER)
 	UEFI_PLATFORM = Platform/Baikal/BS1000Rdb/BS1000Rdb.dsc
-endif
-ifeq ($(SPI_FLASHER),1)
-UEFI_FLAGS += -DBUILD_UEFI_APPS=TRUE
 endif
 
 ARMTF_BUILD_DIR = $(ARMTF_DIR)/build/$(PLAT)/$(ARMTF_BUILD_TYPE)
@@ -123,11 +124,11 @@ setup:
 	mkdir -p $(KBUILD_DIR)
 ifeq ($(SRC_ROOT),)
 else
-	[ -f $(ARMTF_DIR)/.git ] || (cp -pR $(SRC_ROOT)/arm-tf/* $(ARMTF_DIR))
-	[ -f $(UEFI_DIR)/edk2/.git ] || (cp -pR $(SRC_ROOT)/edk2/* $(UEFI_DIR)/edk2)
-	[ -f $(UEFI_DIR)/edk2-non-osi/.git ] || (cp -pR $(SRC_ROOT)/edk2-non-osi/* $(UEFI_DIR)/edk2-non-osi)
-	[ -f $(UEFI_DIR)/edk2-platform-baikal/.git ] || (cp -pR $(SRC_ROOT)/edk2-platform-baikal/* $(UEFI_DIR)/edk2-platform-baikal)
-	[ -f $(KERN_DIR)/.git ] || (cp -pR $(SRC_ROOT)/kernel/* $(KERN_DIR))
+	[ -f $(ARMTF_DIR)/Makefile ] || (cp -pR $(SRC_ROOT)/arm-tf/* $(ARMTF_DIR))
+	[ -f $(UEFI_DIR)/edk2/BaseTools ] || (cp -pR $(SRC_ROOT)/edk2/* $(UEFI_DIR)/edk2)
+	[ -f $(UEFI_DIR)/edk2-non-osi/Emulator ] || (cp -pR $(SRC_ROOT)/edk2-non-osi/* $(UEFI_DIR)/edk2-non-osi)
+	[ -f $(UEFI_DIR)/edk2-platform-baikal/Platform ] || (cp -pR $(SRC_ROOT)/edk2-platform-baikal/* $(UEFI_DIR)/edk2-platform-baikal)
+	[ -f $(KERN_DIR)/Makefile ] || (cp -pR $(SRC_ROOT)/kernel/* $(KERN_DIR))
 endif
 
 modules:
