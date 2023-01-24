@@ -26,7 +26,7 @@ variables:
       GIT_TAG=$(git describe --tags --no-abbrev)
       FULL_PATH="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/firmware/${GIT_TAG}/${BRANCH}${BOARD}_${VERSION}"
       echo "Full path: ${FULL_PATH}"
-      tar cf - -C release/${BOARD} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.gz
+      tar cf - -C release/${BOARD} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.xz
 
 et151-mb-1.1-rev1:
   variables:
