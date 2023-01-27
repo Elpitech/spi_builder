@@ -94,29 +94,20 @@ Upon success, type in BMC console:
 Software flashing via UEFI application
 ======================================
 
-Alternatively, you flash the image via UEFI shell with a dedicated software
-flasher. Build the image first. Next build the flashing UEFI app:
+You can flash the image via UEFI shell with a dedicated software flasher. 
 
+Build the image:
 $ make BOARD=et101-dp
-$ make SPI_FLASHER=1 BOARD=et101-dp uefi
-$ find . -name SpiFlashImage.efi
 
-SpiFlashImage.efi includes the flasher and the bundled *.flash.img file.
+The SPI flasher will be available in 
+uefi/Build/Baikal/RELEASE_GCC5/AARCH64/SpiFlash.efi
 
-- Create the USB flash stick with FAT32
-- Transfer the SpiFlashImage.efi EFI flashing module to USB. This
-  module contains the flasher and the ROM image.
+- Transfer the SpiFlash.efi EFI flashing module and the *.flash.img file
+  to a USB stick formatted with FAT32.
 - Boot the board and go to the BIOS menu by pressing 'Esc'
 - Go to "Boot Manager"/"UEFI Shell"
 - Press 'Esc' to interrupt the booting and go to the interactive UEFI Shell
 - Go to the USB device (FS0) and run the flasher file:
-
-Shell> fs0:
-FS0:\> SpiFlashImage.efi
-
-Alternatively, if using the stand-alone flasher SpiFlash.efi, make sure you
-provide it with the *.flash.img file as argument. Other image formats are not
-suitable.
 
 FS0:\> SpiFlash.efi 0 et101-dp.flash.img
 
