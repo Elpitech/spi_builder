@@ -10,15 +10,6 @@ BAIKAL_DDR_CUSTOM_CLOCK_FREQ = $(shell expr $(MAX_FREQ) / 2)
 SDK_VER := 5.7
 SDK_REV = 0x57
 PLAT = bm1000
-EDK2_TAG = edk2-stable202208
-
-#KERNEL_GIT := https://github.com/Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
-#ARMTF_GIT := https://github.com/Elpitech/arm-tf.git -b $(SDK_VER)-elp
-#EDK2_PLATFORM_SPECIFIC_GIT := https://github.com/Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
-
-KERNEL_GIT := git@gitlab.elpitech.ru:baikal-m/kernel.git -b linux-5.10-elp
-ARMTF_GIT := git@gitlab.elpitech.ru:baikal-m/arm-tf.git -b $(SDK_VER)-elp
-EDK2_PLATFORM_SPECIFIC_GIT := git@gitlab.elpitech.ru:baikal-m/edk2-platform-baikal.git -b $(SDK_VER)-elp
 
 # End of user configurable parameters
 
@@ -180,9 +171,6 @@ clean: basetools-clean
 	rm -f basetools
 	rm -rf $(IMG_DIR) $(REL_DIR)
 	[ -f $(ARMTF_DIR)/Makefile ] && $(MAKE) -C $(ARMTF_DIR) PLAT=bm1000 BAIKAL_TARGET=$(BE_TARGET) realclean || true
-
-distclean: clean
-	rm -rf $(UEFI_DIR) $(ARMTF_DIR) $(KERN_DIR)
 
 list:
 	@echo "BOARD=et101-v2-lvds (et101-mb-1.1-rev2 or et101-mb-1.1-rev1.1)"
