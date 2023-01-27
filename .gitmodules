@@ -12,7 +12,7 @@
 	branch = 5.8-elp
 [submodule "uefi/edk2"]
 	path = uefi/edk2
-	url = http://github.com/tianocore/edk2.git
+	url = ../edk2
 [submodule "uefi/edk2-non-osi"]
 	path = uefi/edk2-non-osi
 	url = http://github.com/tianocore/edk2-non-osi.git
