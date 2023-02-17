@@ -55,6 +55,7 @@ FLASH_IMG=${REL_DIR}/${BOARD}/${MB}-${SUFFIX}.flash.img
 PADDED=${REL_DIR}/${BOARD}/${MB}-${SUFFIX}.full.padded
 LAYOUT=${IMG_DIR}/${MB}.layout
 
+mkdir -p ${REL_DIR}/${BOARD}
 cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit
 chmod a-x ${FLASH_IMG}
 truncate --no-create --size=${BL1_RESERVED_SIZE} ${FLASH_IMG} || exit
