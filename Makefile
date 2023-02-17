@@ -7,10 +7,10 @@ SPI_FLASHER ?= 0
 MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ = $(shell expr $(MAX_FREQ) / 2)
 
-SDK_VER := 5.7
-SDK_REV = 0x57
+SDK_VER := 5.8
+SDK_REV = 0x58
 PLAT = bm1000
-EDK2_TAG = edk2-stable202208
+EDK2_TAG = edk2-stable202211
 
 #KERNEL_GIT := https://github.com/Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
 #ARMTF_GIT := https://github.com/Elpitech/arm-tf.git -b $(SDK_VER)-elp
@@ -65,7 +65,7 @@ else ifeq ($(BOARD),et113)
 	PLAT = bs1000
 	DUAL_FLASH = yes
 	BOARD_VER = 6
-	MAX_FREQ = ""
+	MAX_FREQ =
 endif
 
 ARMTF_DEFS += "BAIKAL_DDR_CUSTOM_CLOCK_FREQ=$(BAIKAL_DDR_CUSTOM_CLOCK_FREQ)"
