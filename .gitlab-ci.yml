@@ -84,7 +84,15 @@ et113-mb-a-server:
     MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
-et141-ramac-2x-pcie-dtx:
+et121-mb-rev1:
+  variables:
+    BOARD: et121
+    ARMTF_DEBUG: 0
+    UEFI_DEBUG: 0
+    MAX_FREQ: 2400
+  <<: *build_firmware_dfn
+
+et141-mb-rev1:
   variables:
     BOARD: et141
     ARMTF_DEBUG: 0
