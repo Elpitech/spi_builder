@@ -38,9 +38,6 @@ case "${BOARD}" in
     et113)
         MB="et113-mb-a-server"
         ;;
-    et141)
-        MB="et141-ramac-2x-pcie-dtx"
-        ;;
     *)
         MB="${BOARD}"
         ;;
