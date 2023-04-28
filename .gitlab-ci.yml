@@ -1,13 +1,17 @@
-image: $CI_REGISTRY/baikal-m/spi_builder:1.0
+image: $CI_REGISTRY/elpitech/lpt/containers/mc-builder:0-0-3
 
 stages:
   - build
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 1
+  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 8
 
 .build_firmware_template: &build_firmware_dfn
   stage: build
+  tags:
+    - kubernetes-mid
   script:
     - make BOARD=${BOARD} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
     - |
