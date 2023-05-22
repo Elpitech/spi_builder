@@ -36,7 +36,7 @@ else ifeq ($(BOARD),e107)
 else ifneq ($(filter et101-%,$(BOARD)),)
 	BE_TARGET = elp_bm
 	BOARD_VER = 2
-else ifeq ($(BOARD),et151)
+else ifneq ($(filter et151-%,$(BOARD)),)
 	BE_TARGET = elp_bm
 	BOARD_VER = 2
 else ifeq ($(BOARD),et141)
