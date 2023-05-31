@@ -9,12 +9,10 @@ iasl device-tree-compiler python3-distutils texinfo git subversion \
 imagemagick xxd flex bison librsvg2-bin xz-utils uuid-dev libgmp3-dev \
 libmpfr-dev libarchive-zip-perl libssl-dev curl
 
-1. Setup the kernel/arm-tf/edk2 source paths in the Makefile
+1. Get the sources:
 
-For example:
-KERNEL_GIT := git@github.com:Elpitech/baikal-m-linux-kernel.git -b linux-5.10-elp
-ARMTF_GIT := git@github.com:Elpitech/arm-tf.git -b $(SDK_VER)-elp
-EDK2_PLATFORM_SPECIFIC_GIT := git@github.com:Elpitech/edk2-platform-baikal.git -b $(SDK_VER)-elp
+Clone the spi_builder.git repo with submodules:
+git clone --recurse-submodules --shallow-submodules git@github.com:Elpitech/spi_builder.git
 
 2. Build the image.
 
@@ -27,40 +25,22 @@ The resulting image is in the ./out dir:
 *.full.padded - image for h/w programmer, padded with zeros
 *.flash.img - image for software flashing via UEFI Shell
 
-Building for a non-default board:
+Build options:
 
-List available targets
+To build for other boards, list available targets. For example:
+
 $ make list
-
-HDMI/LVDS board et101-mb-1.1-rev2 (same for et101-mb-1.1-rev1.1 with genuine stm32):
-$ make BOARD=et101-v2-lvds
-
-HDMI/DP board et101-mb-1.2-rev2 (same for et101-mb-1.2-rev1.2 with genuine stm32):
-$ make BOARD=et101-v2-dp
-
-The couple of earlier boards with genuine stm32 chips have dedicated *.dts files
-with some extended functionality not available on the clones.  These boards are
-not manufactured anymore, but you can build dedicated images for them anyways:
-
-et101-mb-1.1-rev1.1:
-$ make BOARD=et101-lvds
-et101-mb-1.2-rev1.2 
-$ make BOARD=et101-dp
+$ make BOARD=et121
 
 Sometimes RAM modules do not work well with the default 2400 frequency.  In this
-case, you can build an image with non-default (reduced) memory frequency:
-$ make BOARD=et101-v2-dp MAX_FREQ=2133
+case, you can build an image with non-default (reduced) memory frequency. For
+example:
+$ make MAX_FREQ=2133
 
 Hardware flashing
 =================
 
-The following instructions assume the DB101-C programmer board is used.
-If using something else, please beware of the following:
-- The level of UART and SPI signals on ET101 board is 1.8 Volts.
-  Do NOT use adapters (USB-UART, SPI, etc) with 3.3 or 5 Volts
-  level since the board can be permanently damaged.
-- Do NOT plug the standard 20-pin JTAG cable directly into XP8 slot.
-  It will damage the board.
+Flashing with DB101-D programmer:
 
 Configure BMC console file for minicom:
 
@@ -91,15 +71,32 @@ Upon success, type in BMC console:
 
 >:pins board_off
 
+Flashing with Olimex:
+
+When using other programmers for flashing, please beware of the following:
+- The level of UART and SPI signals on ET101 board is 1.8 Volts.
+  Do NOT use adapters (USB-UART, SPI, etc) with 3.3 or 5 Volts
+  level since the board can be permanently damaged.
+- Do NOT plug the standard 20-pin JTAG cable directly into XP8 slot.
+  It will damage the board.
+
+You can use Olimex (arm-usb-tiny-h) programmer to flash the image.  Flashrom
+shall be at least version 1.2 or higher.
+
+$ sudo apt install libftdi1
+
+Burn full image, where BOARD is the target you have built.
+$ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256
+
+[Optional] To burn a specific section
+$ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256 -l img/{BOARD}.layout -i scp
+
+
 Software flashing via UEFI application
 ======================================
 
-You can flash the image via UEFI shell with a dedicated software flasher. 
-
-Build the image:
-$ make BOARD=et101-dp
-
-The SPI flasher will be available in 
+You can flash the image via UEFI shell with a dedicated software flasher. After
+the build the SPI flasher will be available in
 uefi/Build/Baikal/RELEASE_GCC5/AARCH64/SpiFlash.efi
 
 - Transfer the SpiFlash.efi EFI flashing module and the *.flash.img file
@@ -115,45 +112,6 @@ FS0:\> SpiFlash.efi 0 et101-dp.flash.img
 
 FS0:\> reset
 
-The board will boot, initialize its environment, and then will reboot again.
-
-Building/flashing for other boards
-==================================
-
-For TF307 boards:
-$ make BOARD=mitx-d
-
-[Optional] To build for older SDK:
-$ make SDK_MAJOR_REV=4 SDK_MINOR_REV=4 BOARD=mitx-d
-
-For TF307 boards, see tf307_flashing.md for more detailed instructions.
-
-You can use flashrom and Olimex (arm-usb-tiny-h) programmer to flash the image.
-Flashrom shall be at least version 1.2 or higher.
-
-sudo apt install libftdi1
-
-Burn full image, where BOARD is the target you have built.
-$ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256
-
-[Optional] To burn a specific section
-$ sudo flashrom -p ft2232_spi:type=arm-usb-tiny-h,port=A,divisor=8 -w $BOARD.full.padded -c MT25QU256 -l mitx-d.layout -i scp
-
-Building a debug module
-=======================
-
-To build a debug module separate from the SPI image:
-
-Comment out the required module in ArmBaikalPkg/ArmBaikalBfkm.fdf.inc. For example:
-#INF ArmBaikalPkg/Drivers/BaikalEthDxe/BaikalEthDxe.inf
-
-Set UEFI_BUILD_TYPE = DEBUG in the Makefile and run:
-
-$ make uefi
-
-Copy the debug version of the module to USB flash:
-cp  ../baikal-m/uefi/Build/ArmBaikalBfkm-AARCH64/DEBUG_GCC6/AARCH64/BaikalEthDxe.efi /media/ndz/B03B-6A17/
-umount /media/ndz/B03B-6A17
-
-Insert the USB flash and boot. During boot, add the module via menu "Add driver options".
+The board will boot, initialize its environment for about a minute, and then
+will reboot again.
 ```

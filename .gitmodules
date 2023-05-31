@@ -6,6 +6,7 @@
 	path = kernel
 	url = ../kernel
 	branch = linux-5.10-elp
+	shallow = true
 [submodule "uefi/edk2-platform-baikal"]
 	path = uefi/edk2-platform-baikal
 	url = ../edk2-platform-baikal
