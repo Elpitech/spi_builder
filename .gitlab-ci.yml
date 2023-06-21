@@ -13,28 +13,23 @@ variables:
   tags:
     - kubernetes-mid
   script:
-    - make BOARD=${BOARD} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
+    - make BOARD=${BUILD_TARGET} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
     - |
-      BRANCH=""
-      if [ "$CI_COMMIT_BRANCH" != "$CI_DEFAULT_BRANCH" ]; then
-        if [ -n "${CI_COMMIT_BRANCH}" ]; then
-          BRANCH="${CI_COMMIT_BRANCH}_"
-        fi
-      fi
       VERSION=$(git describe --tags)
       [ ${ARMTF_DEBUG} -eq 1 ] && VERSION=${VERSION}-armtfdbg
       [ ${UEFI_DEBUG} -eq 1 ] && VERSION=${VERSION}-uefidbg
       echo "Uploading version ${VERSION}"
-      echo "          branch ${BRANCH}"
-      echo "          board ${BOARD}"
+      echo "          branch ${CI_COMMIT_BRANCH}"
+      echo "          board ${BOARD_NAME}"
       GIT_TAG=$(git describe --tags --no-abbrev)
-      FULL_PATH="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/firmware/${GIT_TAG}/${BRANCH}${BOARD}_${VERSION}"
+      FULL_PATH="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/firmware/${GIT_TAG}/${BOARD_NAME}_${CI_COMMIT_BRANCH}_${VERSION}"
       echo "Full path: ${FULL_PATH}"
-      tar cf - -C release/${BOARD} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.xz
+      tar cf - -C release/${BUILD_TARGET} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.xz
 
 et151-mb-1.2:
   variables:
-    BOARD: et151-dp
+    BOARD_NAME: ET151-MB-1.2
+    BUILD_TARGET: et151-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -42,7 +37,8 @@ et151-mb-1.2:
 
 et151-mb-1.1:
   variables:
-    BOARD: et151-lvds
+    BOARD_NAME: ET151-MB-1.1
+    BUILD_TARGET: et151-lvds
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -50,7 +46,8 @@ et151-mb-1.1:
 
 et101-mb-1.2-rev2:
   variables:
-    BOARD: et101-v2-dp
+    BOARD_NAME: ET101-MB-1.2-Rev2
+    BUILD_TARGET: et101-v2-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -58,7 +55,8 @@ et101-mb-1.2-rev2:
 
 et101-mb-1.1-rev2:
   variables:
-    BOARD: et101-v2-lvds
+    BOARD_NAME: ET101-MB-1.1-Rev2
+    BUILD_TARGET: et101-v2-lvds
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -66,7 +64,8 @@ et101-mb-1.1-rev2:
 
 tf307-mb-s-d-rev4.0:
   variables:
-    BOARD: mitx-d
+    BOARD_NAME: TF307-MB-S-D-Rev4.0
+    BUILD_TARGET: mitx-d
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -74,7 +73,8 @@ tf307-mb-s-d-rev4.0:
 
 em407-com-express:
   variables:
-    BOARD: em407
+    BOARD_NAME: EM407
+    BUILD_TARGET: em407
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -82,7 +82,8 @@ em407-com-express:
 
 et111-laptop:
   variables:
-    BOARD: et111
+    BOARD_NAME: ET111
+    BUILD_TARGET: et111
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -90,7 +91,8 @@ et111-laptop:
 
 et113-mb-a-server:
   variables:
-    BOARD: et113
+    BOARD_NAME: ET113-MB-A
+    BUILD_TARGET: et113
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -98,7 +100,8 @@ et113-mb-a-server:
 
 et121-mb-rev1:
   variables:
-    BOARD: et121
+    BOARD_NAME: ET121-MB-Rev1
+    BUILD_TARGET: et121
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
@@ -106,7 +109,8 @@ et121-mb-rev1:
 
 et141-mb-rev1:
   variables:
-    BOARD: et141
+    BOARD_NAME: ET141-MB-Rev1
+    BUILD_TARGET: et141
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
     MAX_FREQ: 2400
