@@ -3,7 +3,7 @@ BOARD ?= et101-v2-dp
 #BOARD ?= et101-v2-lvds
 SPI_FLASHER ?= 0
 #MAX_FREQ ?= 2133
-MAX_FREQ ?= 2400
+#MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ = $(shell expr $(MAX_FREQ) / 2)
 
 SDK_VER := 5.8
