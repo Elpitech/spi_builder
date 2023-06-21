@@ -9,10 +9,8 @@ FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESE
 FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
 if [ -d .git ] ; then
 	RELTAG=$(git describe --tags)
-	BRANCH=$(git branch --show-current)
 else
 	RELTAG=$(date +%Y%m%d)
-	BRANCH=${SDK_VER}
 fi
 
 case "${BOARD}" in
@@ -29,7 +27,7 @@ case "${BOARD}" in
         MB="ET141-MB-Rev1"
         ;;
     et101-lvds)
-        MB="Et101-MB-1.1-Rev1.1"
+        MB="ET101-MB-1.1-Rev1.1"
         ;;
     et101-v2-lvds)
         MB="ET101-MB-1.1-Rev2"
@@ -55,9 +53,9 @@ case "${BOARD}" in
 esac
 
 if [ -n "${MAX_FREQ}" ] ; then
-	SUFFIX=${BRANCH}-${MAX_FREQ}_${RELTAG}
+	SUFFIX=${SDK_VER}-${MAX_FREQ}_${RELTAG}
 else
-	SUFFIX=${BRANCH}_${RELTAG}
+	SUFFIX=${SDK_VER}_${RELTAG}
 fi
 FLASH_IMG=${REL_DIR}/${BOARD}/${MB}_${SUFFIX}.flash.img
 PADDED=${REL_DIR}/${BOARD}/${MB}_${SUFFIX}.full.padded

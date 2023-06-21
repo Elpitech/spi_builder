@@ -13,7 +13,7 @@ variables:
   tags:
     - kubernetes-mid
   script:
-    - make BOARD=${BUILD_TARGET} MAX_FREQ=${MAX_FREQ} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
+    - make BOARD=${BUILD_TARGET} ARMTF_DEBUG=${ARMTF_DEBUG} UEFI_DEBUG=${UEFI_DEBUG}
     - |
       VERSION=$(git describe --tags)
       [ ${ARMTF_DEBUG} -eq 1 ] && VERSION=${VERSION}-armtfdbg
@@ -32,7 +32,6 @@ et151-mb-1.2:
     BUILD_TARGET: et151-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et151-mb-1.1:
@@ -41,7 +40,6 @@ et151-mb-1.1:
     BUILD_TARGET: et151-lvds
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et101-mb-1.2-rev2:
@@ -50,7 +48,6 @@ et101-mb-1.2-rev2:
     BUILD_TARGET: et101-v2-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et101-mb-1.1-rev2:
@@ -59,7 +56,6 @@ et101-mb-1.1-rev2:
     BUILD_TARGET: et101-v2-lvds
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 tf307-mb-s-d-rev4.0:
@@ -68,7 +64,6 @@ tf307-mb-s-d-rev4.0:
     BUILD_TARGET: mitx-d
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 em407-com-express:
@@ -77,7 +72,6 @@ em407-com-express:
     BUILD_TARGET: em407
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et111-laptop:
@@ -86,7 +80,6 @@ et111-laptop:
     BUILD_TARGET: et111
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et113-mb-a-server:
@@ -95,7 +88,6 @@ et113-mb-a-server:
     BUILD_TARGET: et113
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et121-mb-rev1:
@@ -104,7 +96,6 @@ et121-mb-rev1:
     BUILD_TARGET: et121
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
 et141-mb-rev1:
@@ -113,6 +104,5 @@ et141-mb-rev1:
     BUILD_TARGET: et141
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
-    MAX_FREQ: 2400
   <<: *build_firmware_dfn
 
