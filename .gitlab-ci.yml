@@ -26,9 +26,9 @@ variables:
       echo "Full path: ${FULL_PATH}"
       tar cf - -C release/${BUILD_TARGET} . | xz -z9 -T0 -c - | curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file - ${FULL_PATH}.images.tar.xz
 
-et151-mb-1.2:
+et151-mb-2-rev1:
   variables:
-    BOARD_NAME: ET151-MB-1.2
+    BOARD_NAME: ET151-MB-2-Rev1
     BUILD_TARGET: et151-dp
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0
