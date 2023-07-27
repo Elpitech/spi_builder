@@ -3,10 +3,12 @@
 
 BL1_RESERVED_SIZE=$((4 * 65536)) #0x40000
 DTB_SIZE=$(( 4 * 65536 ))
+TRF_OFFS=$((2 * 65536))
 UEFI_VARS_SIZE=$(( 12 * 65536 ))
 LINUX_PART_START=$(( 8 * 1024 * 1024 ))
 FIP_MAX_SIZE=$(($LINUX_PART_START - ($DTB_SIZE) - ($UEFI_VARS_SIZE) - ($BL1_RESERVED_SIZE)))
 FIP_BIN=${IMG_DIR}/${BOARD}.fip.bin
+TRF_IMG=${IMG_DIR}/../prebuilts/bs1000-ddr-trainfware.bin
 if [ -d .git ] ; then
 	RELTAG=$(git describe --tags)
 else
@@ -66,7 +68,11 @@ cp -f ${IMG_DIR}/${BOARD}.bl1.bin ${FLASH_IMG} || exit
 chmod a-x ${FLASH_IMG}
 truncate --no-create --size=${BL1_RESERVED_SIZE} ${FLASH_IMG} || exit
 cat ${IMG_DIR}/${BOARD}.dtb >> ${FLASH_IMG} || exit
-truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE)) ${FLASH_IMG} || exit
+if [ "${PLAT}" = "bs1000" ] ; then
+	echo 1fc00 01 11 21 31 41 51 61 71 81 91 a1 b1 | xxd -r  - ${FLASH_IMG}
+	truncate --no-create --size=$(($BL1_RESERVED_SIZE + $TRF_OFFS)) ${FLASH_IMG} || exit
+	cat ${TRF_IMG} >> ${FLASH_IMG}
+fi
 truncate --no-create --size=$(($BL1_RESERVED_SIZE + $DTB_SIZE + $UEFI_VARS_SIZE)) ${FLASH_IMG} || exit
 cat ${FIP_BIN} >> ${FLASH_IMG} || exit
 
@@ -82,9 +88,6 @@ if [ ${DUAL_FLASH} = 'no' ]; then
 	echo "001c0000:007fffff fip" >> ${LAYOUT}
 	echo "00800000:01ffffff fat" >> ${LAYOUT}
 else
-	if [ "${PLAT}" = "bs1000" ] ; then
-		echo 1fc00 0f 1f 2f 3f 4f 5f 6f 7f 8f 9f af bf | xxd -r  - ${FLASH_IMG}
-	fi
 	dd if=${FLASH_IMG} of=${PADDED} conv=notrunc || exit
 	echo "00000000:0003ffff bl1" > ${LAYOUT}
 	echo "00040000:0007ffff dtb" >> ${LAYOUT}

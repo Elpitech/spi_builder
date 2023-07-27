@@ -6,8 +6,8 @@ SPI_FLASHER ?= 0
 #MAX_FREQ ?= 2400
 BAIKAL_DDR_CUSTOM_CLOCK_FREQ = $(shell expr $(MAX_FREQ) / 2)
 
-SDK_VER := 5.8
-SDK_REV = 0x58
+SDK_VER := 6.2
+SDK_REV = 0x62
 PLAT = bm1000
 
 # End of user configurable parameters
@@ -32,7 +32,7 @@ else ifneq ($(filter et101-%,$(BOARD)),)
 	BOARD_VER = 2
 else ifneq ($(filter et151-%,$(BOARD)),)
 	BE_TARGET = elp_bm
-	BOARD_VER = 2
+	BOARD_VER = 7
 else ifeq ($(BOARD),et141)
 	BE_TARGET = elp_bm
 	BOARD_VER = 5
@@ -53,7 +53,9 @@ else ifeq ($(BOARD),et113)
 	MAX_FREQ =
 endif
 
+ifneq ($(MAX_FREQ),)
 ARMTF_DEFS += "BAIKAL_DDR_CUSTOM_CLOCK_FREQ=$(BAIKAL_DDR_CUSTOM_CLOCK_FREQ)"
+endif
 DUAL_FLASH ?= no
 ARMTF_DEFS += "DUAL_FLASH=$(DUAL_FLASH)"
 ifeq ($(V),1)
@@ -144,8 +146,16 @@ arm-tf $(IMG_DIR)/$(BOARD).fip.bin $(IMG_DIR)/$(BOARD).bl1.bin: $(IMG_DIR)/$(BOA
 		mkdir -p $(ARMTF_DIR)/build; \
 	fi
 	echo $(BOARD) > $(ARMTF_DIR)/build/subtarget
-	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) $(ARMTF_DEFS) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 -C $(ARMTF_DIR) all
-	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) BAIKAL_TARGET=$(BE_TARGET) BOARD_VER=$(BOARD_VER) $(ARMTF_DEFS) PLAT=$(PLAT) DEBUG=$(ARMTF_DEBUG) LOAD_IMAGE_V2=0 BL33=$(IMG_DIR)/$(BOARD).efi.fd -C $(ARMTF_DIR) fip
+	$(MAKE) -j$(NCPU) CROSS_COMPILE=$(CROSS) \
+		BAIKAL_TARGET=$(BE_TARGET) \
+		BOARD_VER=$(BOARD_VER) \
+		$(ARMTF_DEFS) \
+		PLAT=$(PLAT) \
+		SDK_VERSION=$(SDK_VER) \
+		VERSION_STRING="$(SDK_VER)-elp" \
+		BL33=$(IMG_DIR)/$(BOARD).efi.fd \
+		DEBUG=$(ARMTF_DEBUG) \
+		-C $(ARMTF_DIR) all fip memmap
 	cp $(FIP_BIN) $(IMG_DIR)/$(BOARD).fip.bin
 	cp $(BL1_BIN) $(IMG_DIR)/$(BOARD).bl1.bin
 
