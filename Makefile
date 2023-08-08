@@ -39,6 +39,9 @@ else ifeq ($(BOARD),et141)
 else ifeq ($(BOARD),et121)
 	BE_TARGET = elp_bm
 	BOARD_VER = 5
+else ifeq ($(BOARD),et161)
+	BE_TARGET = elp_bm
+	BOARD_VER = 5
 else ifeq ($(BOARD),et111)
 	BE_TARGET = elp_bm
 	BOARD_VER = 3
