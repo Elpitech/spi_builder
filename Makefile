@@ -32,11 +32,14 @@ else ifneq ($(filter et101-%,$(BOARD)),)
 	BOARD_VER = 2
 else ifneq ($(filter et151-%,$(BOARD)),)
 	BE_TARGET = elp_bm
-	BOARD_VER = 2
+	BOARD_VER = 7
 else ifeq ($(BOARD),et141)
 	BE_TARGET = elp_bm
 	BOARD_VER = 5
 else ifeq ($(BOARD),et121)
+	BE_TARGET = elp_bm
+	BOARD_VER = 5
+else ifeq ($(BOARD),et161)
 	BE_TARGET = elp_bm
 	BOARD_VER = 5
 else ifeq ($(BOARD),et111)
