@@ -100,6 +100,9 @@ Software flashing via UEFI application
 You can flash the image via UEFI shell with a dedicated software flasher. After
 the build the SPI flasher will be available in
 uefi/Build/Baikal/RELEASE_GCC5/AARCH64/SpiFlash.efi
+Note: the SpiFlash.efi version shall match the SDK generation of the SPI
+firmware. For example, if your currently installed SPI image is based on
+SDK 5.*, then take the SpiFilash.efi from SDK 5.*.
 
 - Transfer the SpiFlash.efi EFI flashing module and the *.flash.img file
   to a USB stick formatted with FAT32.
