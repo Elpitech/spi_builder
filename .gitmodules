@@ -2,11 +2,6 @@
 	path = arm-tf
 	url = ../arm-tf
 	branch = 6.2-elp
-[submodule "kernel"]
-	path = kernel
-	url = ../kernel
-	branch = linux-6.1-elp
-	shallow = true
 [submodule "uefi/edk2-platform-baikal"]
 	path = uefi/edk2-platform-baikal
 	url = ../edk2-platform-baikal
