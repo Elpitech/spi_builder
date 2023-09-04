@@ -17,3 +17,7 @@
 [submodule "uefi/edk2-platforms"]
 	path = uefi/edk2-platforms
 	url = https://github.com/tianocore/edk2-platforms.git
+[submodule "kernel"]
+	path = kernel
+	url = ../kernel
+	branch = linux-6.1-elp
