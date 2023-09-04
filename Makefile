@@ -120,8 +120,8 @@ else
 	[ -f $(KERN_DIR)/Makefile ] || (cp -pR $(SRC_ROOT)/kernel/* $(KERN_DIR))
 endif
 
-modules:
-	git submodule update --init --recursive
+submodules:
+	git submodule update --init --recursive --recommend-shallow
 
 # Note: BaseTools cannot be built in parallel.
 basetools:

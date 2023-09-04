@@ -1,19 +1,20 @@
 [submodule "arm-tf"]
 	path = arm-tf
 	url = ../arm-tf
-	branch = 5.8-elp
+	branch = 6.2-elp
 [submodule "kernel"]
 	path = kernel
 	url = ../kernel
-	branch = linux-5.10-elp
+	branch = linux-6.1-elp
 	shallow = true
 [submodule "uefi/edk2-platform-baikal"]
 	path = uefi/edk2-platform-baikal
 	url = ../edk2-platform-baikal
-	branch = 5.8-elp
+	branch = 6.2-elp
 [submodule "uefi/edk2"]
 	path = uefi/edk2
 	url = ../edk2
+	shallow = true
 [submodule "uefi/edk2-non-osi"]
 	path = uefi/edk2-non-osi
 	url = http://github.com/tianocore/edk2-non-osi.git

@@ -74,9 +74,9 @@ em407-com-express:
     UEFI_DEBUG: 0
   <<: *build_firmware_dfn
 
-et111-laptop:
+et111-mb-rev1.0:
   variables:
-    BOARD_NAME: ET111
+    BOARD_NAME: ET111-MB-Rev1.0
     BUILD_TARGET: et111
     ARMTF_DEBUG: 0
     UEFI_DEBUG: 0

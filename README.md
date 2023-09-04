@@ -64,8 +64,10 @@ Run the commands
 
 # Burn full image, where BOARD is the target you have built.
 $ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c MT25QU256 -w $BOARD.full.padded
-If chip is not found, try a different one or omit -c option:
+If chip is not found, try a different one or omit -c option for automatic chip search:
 $ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c W25Q256.W -w $BOARD.full.padded
+$ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -c MX25U25635F -w $BOARD.full.padded
+$ sudo flashrom -p serprog:dev=/dev/ttyACM0:4000000 -w $BOARD.full.padded
 
 Upon success, type in BMC console:
 
