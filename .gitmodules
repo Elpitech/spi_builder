@@ -21,3 +21,4 @@
 	path = kernel
 	url = ../kernel
 	branch = linux-6.1-elp
+	shallow = true
