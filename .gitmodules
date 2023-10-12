@@ -9,7 +9,7 @@
 [submodule "uefi/edk2"]
 	path = uefi/edk2
 	url = ../edk2
-	shallow = true
+	branch = local_modules
 [submodule "uefi/edk2-non-osi"]
 	path = uefi/edk2-non-osi
 	url = ../edk2-non-osi.git
