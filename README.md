@@ -37,6 +37,26 @@ case, you can build an image with non-default (reduced) memory frequency. For
 example:
 $ make MAX_FREQ=2133
 
+Other make options:
+
+$ make ARMTF_NO_PRINT=1 UEFI_NO_CONSOLE=1
+
+This disables text output to graphics console from arm-tf and uefi. It may be
+used for rotated screen. Only arm-tf logo is displayed in this case. UEFI
+console is not available.
+
+$ make ARMTF_LOGO=elpitech_bl31_logo UEFI_LOGO=LogoElp setup
+
+This configures alternative logos for further build (BM1000 only). The arguments
+are the basenames of the corresponding logo files without suffix. The files 
+(*.c and *.bmp) must exist in arm-tf/plat/baikal/bm1000 and Platform/Baikal/Logo
+respectively. The "setup" target is required. All later builds will use the
+configured logos. The commandline above resets to the default Elpitech logos.
+
+$ make OEM_VENDOR=Name
+
+This changes uefi firmware vendor name to "Name" (instead of Elpitech).
+
 Hardware flashing
 =================
 

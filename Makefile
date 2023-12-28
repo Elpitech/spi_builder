@@ -54,6 +54,12 @@ else ifeq ($(BOARD),et113)
 	DUAL_FLASH = yes
 	BOARD_VER = 6
 	MAX_FREQ =
+else ifeq ($(BOARD),et143)
+	BE_TARGET = elp_bs
+	PLAT = bs1000
+	DUAL_FLASH = yes
+	BOARD_VER = 8
+	MAX_FREQ =
 endif
 
 ifneq ($(MAX_FREQ),)
@@ -72,6 +78,9 @@ ARMTF_BUILD_TYPE = release
 else
 ARMTF_BUILD_TYPE = debug
 endif
+ifeq ($(ARMTF_NO_PRINT),1)
+ARMTF_DEFS += "ARMTF_NO_PRINT=1"
+endif
 
 SCP_BLOB = ./prebuilts/bm1000-scp.bin
 
@@ -88,7 +97,14 @@ ifneq ($(MAX_FREQ),)
 else
 	UEFI_FLAGS = -DFIRMWARE_VERSION_STRING=$(SDK_VER) -DFIRMWARE_REVISION=$(SDK_REV)
 endif
+ifneq ($(OEM_VENDOR),)
+UEFI_FLAGS += -DFIRMWARE_VENDOR="$(OEM_VENDOR)"
+else
 UEFI_FLAGS += -DFIRMWARE_VENDOR="Elpitech"
+endif
+ifeq ($(UEFI_NO_CONSOLE),1)
+UEFI_FLAGS += -DUEFI_NO_CONSOLE=TRUE
+endif
 ifeq ($(BE_TARGET),elp_bm)
 	TARGET_CFG = bm1000_defconfig
 	TARGET_DTB = baikal/bm-$(BOARD).dtb
@@ -118,6 +134,14 @@ else
 	[ -f $(UEFI_DIR)/edk2-non-osi/Emulator ] || (cp -pR $(SRC_ROOT)/edk2-non-osi/* $(UEFI_DIR)/edk2-non-osi)
 	[ -f $(UEFI_DIR)/edk2-platform-baikal/Platform ] || (cp -pR $(SRC_ROOT)/edk2-platform-baikal/* $(UEFI_DIR)/edk2-platform-baikal)
 	[ -f $(KERN_DIR)/Makefile ] || (cp -pR $(SRC_ROOT)/kernel/* $(KERN_DIR))
+endif
+ifneq ($(ARMTF_LOGO),)
+	[ -f $(ARMTF_DIR)/plat/baikal/bm1000/$(ARMTF_LOGO).c ] && \
+		ln -sf $(ARMTF_LOGO).c $(ARMTF_DIR)/plat/baikal/bm1000/bm1000_bl31_logo.c
+endif
+ifneq ($(UEFI_LOGO),)
+	[ -f $(UEFI_DIR)/edk2-platform-baikal/Platform/Baikal/Logo/$(UEFI_LOGO).bmp ] && \
+		ln -sf $(UEFI_LOGO).bmp $(UEFI_DIR)/edk2-platform-baikal/Platform/Baikal/Logo/Logo.bmp
 endif
 
 submodules:
